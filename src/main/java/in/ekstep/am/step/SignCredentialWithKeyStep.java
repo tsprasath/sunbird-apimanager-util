@@ -2,6 +2,8 @@ package in.ekstep.am.step;
 
 import in.ekstep.am.builder.CredentialDetails;
 import in.ekstep.am.jwt.JWTUtil;
+import in.ekstep.am.jwt.KeyData;
+import in.ekstep.am.jwt.KeyManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,22 +17,22 @@ public class SignCredentialWithKeyStep implements Step {
   private String userName;
   private CredentialDetails responseBuilder;
   private String key;
-  private PrivateKey secretKey;
+  private KeyManager keyManager;
   private String keyId;
 
-  SignCredentialWithKeyStep(String userName, CredentialDetails responseBuilder, String key, PrivateKey secretKey, String keyId) {
+  SignCredentialWithKeyStep(String userName, CredentialDetails responseBuilder, String key, KeyManager keyManager) {
     this.userName = userName;
     this.responseBuilder = responseBuilder;
     this.key = key;
-    this.secretKey = secretKey;
-    this.keyId = keyId;
+    this.keyManager = keyManager;
   }
 
   @Override
   public void execute() throws Exception {
      responseBuilder.setKey(key);
-     String issuerStr = keyId + "-" + key + "-" + System.currentTimeMillis();
-     responseBuilder.setToken(JWTUtil.createRS256Token(issuerStr, secretKey, createHeaderOptions()));
+     KeyData keyData = keyManager.getRandomKey();
+     String issuerStr = keyData.getKeyId() + "-" + key + "-" + System.currentTimeMillis();
+     responseBuilder.setToken(JWTUtil.createRS256Token(issuerStr, keyData.getPrivateKey(), createHeaderOptions()));
   }
 
   private Map<String, String> createHeaderOptions() {
