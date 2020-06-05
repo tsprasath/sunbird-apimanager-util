@@ -18,7 +18,6 @@ public class SignCredentialWithKeyStep implements Step {
   private CredentialDetails responseBuilder;
   private String key;
   private KeyManager keyManager;
-  private String keyId;
 
   SignCredentialWithKeyStep(String userName, CredentialDetails responseBuilder, String key, KeyManager keyManager) {
     this.userName = userName;
@@ -32,10 +31,10 @@ public class SignCredentialWithKeyStep implements Step {
      responseBuilder.setKey(key);
      KeyData keyData = keyManager.getRandomKey();
      String issuerStr = keyData.getKeyId() + "-" + key + "-" + System.currentTimeMillis();
-     responseBuilder.setToken(JWTUtil.createRS256Token(issuerStr, keyData.getPrivateKey(), createHeaderOptions()));
+     responseBuilder.setToken(JWTUtil.createRS256Token(issuerStr, keyData.getPrivateKey(), createHeaderOptions(keyData.getKeyId())));
   }
 
-  private Map<String, String> createHeaderOptions() {
+  private Map<String, String> createHeaderOptions(String keyId) {
     Map<String, String> headers = new HashMap<>();
     headers.put("kid", keyId);
     return headers;
