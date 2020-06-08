@@ -20,8 +20,10 @@ public class Payload {
     @JsonProperty
     private String token;
 
-    private Payload() {
+    private long exp;
+    private long iat;
 
+    private Payload() {
     }
 
     public Payload(String parentId, String sub) {
@@ -31,6 +33,14 @@ public class Payload {
 
     public void setToken(String token) {
         this.token = token;
+    }
+
+    public void setExp(long exp) {
+        this.exp = exp;
+    }
+
+    public void setIat(long iat) {
+        this.iat = iat;
     }
 
     @Override

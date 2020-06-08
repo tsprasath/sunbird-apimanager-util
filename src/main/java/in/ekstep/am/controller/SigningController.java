@@ -1,16 +1,10 @@
 package in.ekstep.am.controller;
 
 import com.codahale.metrics.annotation.Timed;
-import in.ekstep.am.builder.RegisterCredentialResponseBuilder;
 import in.ekstep.am.builder.SignPayloadResponseBuilder;
-import in.ekstep.am.dto.ResponseParams;
-import in.ekstep.am.dto.credential.RegisterCredentialRequest;
-import in.ekstep.am.dto.credential.RegisterCredentialResponse;
-import in.ekstep.am.dto.credential.RegisterCredentialResult;
 import in.ekstep.am.dto.signing.Payload;
 import in.ekstep.am.dto.signing.SignPayloadRequest;
 import in.ekstep.am.dto.signing.SignPayloadResponse;
-import in.ekstep.am.dto.signing.SignPayloadResult;
 import in.ekstep.am.jwt.JWTUtil;
 import in.ekstep.am.jwt.KeyData;
 import in.ekstep.am.jwt.KeyManager;
@@ -24,15 +18,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import static java.text.MessageFormat.format;
-
 import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionException;
+
+import static java.text.MessageFormat.format;
 
 @RestController
 public class SigningController {
@@ -53,6 +46,10 @@ public class SigningController {
             return responseBuilder.badRequest(bindingResult);
         }
 
+        //Hardcoding to 2 years
+        long iat = System.currentTimeMillis() / 1000;
+        long expiry = iat + 63072000L;
+
         responseBuilder
                 .withMsgid(request.msgid())
                 .markSuccess();
@@ -64,6 +61,8 @@ public class SigningController {
             List<CompletableFuture<String>> futures = new ArrayList<>();
             for (int i = 0; i < data.length; i++) {
                 Payload item = data[i];
+                item.setIat(iat);
+                item.setExp(expiry);
                 CompletableFuture<String> future = CompletableFuture.supplyAsync(() -> {
                     String token = JWTUtil.createRS256Token(headerOptions, item, keyData.getPrivateKey());
                     item.setToken(token);

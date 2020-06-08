@@ -38,8 +38,9 @@ public class JWTUtil {
     }
 
     private static String createClaims(String subject) {
-        Map<String, String> payloadData = new HashMap<>();
+        Map<String, Object> payloadData = new HashMap<>();
         payloadData.put("iss", subject);
+        payloadData.put("iat", System.currentTimeMillis()/1000);
         return encodeToBase64Uri(GsonUtil.toJson(payloadData).getBytes());
     }
 

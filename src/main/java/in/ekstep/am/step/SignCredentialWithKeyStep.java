@@ -30,8 +30,7 @@ public class SignCredentialWithKeyStep implements Step {
   public void execute() throws Exception {
      responseBuilder.setKey(key);
      KeyData keyData = keyManager.getRandomKey();
-     String issuerStr = keyData.getKeyId() + "-" + key + "-" + System.currentTimeMillis();
-     responseBuilder.setToken(JWTUtil.createRS256Token(issuerStr, keyData.getPrivateKey(), createHeaderOptions(keyData.getKeyId())));
+     responseBuilder.setToken(JWTUtil.createRS256Token(key, keyData.getPrivateKey(), createHeaderOptions(keyData.getKeyId())));
   }
 
   private Map<String, String> createHeaderOptions(String keyId) {
