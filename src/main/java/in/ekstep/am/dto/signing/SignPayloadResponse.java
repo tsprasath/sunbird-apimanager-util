@@ -1,4 +1,4 @@
-package in.ekstep.am.dto.consumer;
+package in.ekstep.am.dto.signing;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -6,7 +6,7 @@ import in.ekstep.am.dto.ResponseParams;
 import in.ekstep.am.dto.ResponseStatus;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class CreateConsumerResponse {
+public class SignPayloadResponse {
   @JsonProperty
   private String id;
   @JsonProperty
@@ -16,13 +16,13 @@ public class CreateConsumerResponse {
   @JsonProperty
   private ResponseParams params;
   @JsonProperty
-  private CreateConsumerResult result;
+  private SignPayloadResult result;
 
-  private CreateConsumerResponse() {
+  private SignPayloadResponse() {
   }
 
-  public CreateConsumerResponse(String id, String ver, long ets, ResponseParams params, CreateConsumerResult result) {
-    this.id = "ekstep.api.am.adminutil.consumer.create";
+  public SignPayloadResponse(String id, String ver, long ets, ResponseParams params, SignPayloadResult result) {
+    this.id = "ekstep.api.am.adminutil.sign.payload";
     this.ver = ver;
     this.ets = ets;
     this.params = params;
@@ -31,7 +31,7 @@ public class CreateConsumerResponse {
 
   @Override
   public String toString() {
-    return "CreateConsumerResponse{" +
+    return "SignChildTokensResponse{" +
         "id='" + id + '\'' +
         ", ver='" + ver + '\'' +
         ", ets=" + ets +

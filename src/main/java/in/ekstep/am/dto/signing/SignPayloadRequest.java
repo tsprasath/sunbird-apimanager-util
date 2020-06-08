@@ -1,4 +1,4 @@
-package in.ekstep.am.dto.consumer;
+package in.ekstep.am.dto.signing;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -8,7 +8,7 @@ import javax.validation.constraints.NotNull;
 import java.util.Map;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class CreateConsumerRequest {
+public class SignPayloadRequest {
   @JsonProperty
   private String id;
 
@@ -24,12 +24,12 @@ public class CreateConsumerRequest {
   @JsonProperty
   @Valid
   @NotNull(message = "REQUEST IS MANDATORY")
-  private CreateConsumerRequestDetails request;
+  private SignPayloadRequestDetails request;
 
-  private CreateConsumerRequest() {
+  private SignPayloadRequest() {
   }
 
-  public CreateConsumerRequest(Map<String, Object> params, CreateConsumerRequestDetails request) {
+  public SignPayloadRequest(Map<String, Object> params, SignPayloadRequestDetails request) {
     this.params = params;
     this.request = request;
   }
@@ -38,22 +38,7 @@ public class CreateConsumerRequest {
     return params == null ? "" : params.get("msgid") == null ? "" : (String) params.get("msgid");
   }
 
-  public String username() {
-    return request.username();
-  }
-
-  public CreateConsumerRequestDetails getRequest() {
+  public SignPayloadRequestDetails getRequest() {
     return request;
-  }
-
-  @Override
-  public String toString() {
-    return "CreateConsumerRequest{" +
-        "id='" + id + '\'' +
-        ", ver='" + ver + '\'' +
-        ", ets=" + ets +
-        ", params=" + params +
-        ", request=" + request +
-        '}';
   }
 }

@@ -22,6 +22,13 @@ public class JWTUtil {
         return payLoad + SEPARATOR + signature;
     }
 
+    public static String createRS256Token(Map<String, String> headerOptions, Object payload, PrivateKey privateKey) {
+        JWTokenType tokenType = JWTokenType.RS256;
+        String payLoad = createHeader(tokenType, headerOptions) + SEPARATOR + createPayload(payload);
+        String signature = encodeToBase64Uri(CryptoUtil.generateRSASign(payLoad, privateKey, tokenType.getAlgorithmName()));
+        return payLoad + SEPARATOR + signature;
+    }
+
     private static String createHeader(JWTokenType tokenType, Map<String, String> headerOptions) {
         Map<String, String> headerData = new HashMap<>();
         if (headerOptions != null)
@@ -34,6 +41,10 @@ public class JWTUtil {
         Map<String, String> payloadData = new HashMap<>();
         payloadData.put("iss", subject);
         return encodeToBase64Uri(GsonUtil.toJson(payloadData).getBytes());
+    }
+
+    private static String createPayload(Object payload) {
+        return encodeToBase64Uri(GsonUtil.toJson(payload).getBytes());
     }
 
     private static String encodeToBase64Uri(byte[] data) {
