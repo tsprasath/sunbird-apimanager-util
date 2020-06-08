@@ -61,9 +61,18 @@ public class SigningController {
             KeyData keyData = keyManager.getRandomKey();
             Map<String, String> headerOptions = createHeaderOptions(keyData.getKeyId());
             Payload[] data = request.getRequest().data();
+            List<CompletableFuture<String>> futures = new ArrayList<>();
             for (int i = 0; i < data.length; i++) {
-                data[i].setToken(JWTUtil.createRS256Token(headerOptions, data[i], keyData.getPrivateKey()));
+                Payload item = data[i];
+                CompletableFuture<String> future = CompletableFuture.supplyAsync(() -> {
+                    String token = JWTUtil.createRS256Token(headerOptions, item, keyData.getPrivateKey());
+                    item.setToken(token);
+                    return token;
+                });
+                futures.add(future);
             }
+            CompletableFuture[] allFutures = futures.toArray(new CompletableFuture[futures.size()]);
+            CompletableFuture.allOf(allFutures).get();
             responseBuilder.setData(data);
             return responseBuilder.response();
 

@@ -1,12 +1,12 @@
 version: '3.5'
 services:
   adminutil:
-    image: mathewjpallan/adminutil:1.0.2
+    build: .
     deploy:
       resources:
         limits:
           cpus: '4'
-          memory: 8000M
+          memory: 4000M
     ports:
       - "4000:4000"
     environment:
