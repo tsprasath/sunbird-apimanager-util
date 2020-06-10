@@ -17,36 +17,51 @@ import java.util.Map;
 @Component
 public class KeyManager {
     private final Logger log = LoggerFactory.getLogger(this.getClass());
-
+    private static final String SEPARATOR = "_";
     private Map<String, KeyData> keyMap = new HashMap<String, KeyData>();
+    private Map<String, String> keyMetadata = new HashMap<>();
 
     @Autowired
     private Environment environment;
 
-    private String basePath;
-    private String keyPrefix;
-    private int keyCount = 0;
-
     @PostConstruct
     public void init() throws Exception {
-        basePath = environment.getProperty("am.admin.api.jwt.basepath");
-        keyPrefix = environment.getProperty("am.admin.api.jwt.keyprefix");
-        keyCount = Integer.parseInt(environment.getProperty("am.admin.api.jwt.keycount"));
+        String keys[] = environment.getProperty("am.admin.api.keys").split(",");
 
-        for(int i = 0; i < keyCount; i++) {
-            log.info("Private key loaded - " + basePath + keyPrefix + i);
-            String keyId = keyPrefix + i;
-            keyMap.put(keyId, new KeyData(
-                    keyId, getPrivateKey(basePath + keyId), null));
+        for (String key :keys) {
+            loadKeys(key);
         }
     }
 
-    public KeyData getRandomKey() {
-        int keyId = (int) (Math.random() * keyCount);
+    private void loadKeys(String keyName) throws Exception {
+        String basePath = environment.getProperty("am.admin.api."+ keyName + ".basepath");
+        String keyPrefix = environment.getProperty("am.admin.api."+ keyName + ".keyprefix");
+        int keyCount = Integer.parseInt(environment.getProperty("am.admin.api."+ keyName + ".keycount"));
+        int keyStart = Integer.parseInt(environment.getProperty("am.admin.api."+ keyName + ".keystart"));
+        keyMetadata.put(keyName + SEPARATOR + "keyCount", String.valueOf(keyCount));
+        keyMetadata.put(keyName + SEPARATOR + "keyStart", String.valueOf(keyStart));
+        keyMetadata.put(keyName + SEPARATOR + "keyPrefix", String.valueOf(keyPrefix));
+        keyMetadata.put(keyName + SEPARATOR + "basePath", String.valueOf(basePath));
+
+        for(int i = keyStart; i < (keyStart + keyCount); i++) {
+            log.info("Private key loaded - " + basePath + keyPrefix + i);
+            String keyId = keyPrefix + i;
+            keyMap.put(keyId, new KeyData(
+                    keyId, loadPrivateKey(basePath + keyId), null));
+        }
+
+    }
+
+    public KeyData getRandomKey(String keyName) {
+        int keyCount = Integer.parseInt(keyMetadata.get(keyName + SEPARATOR + "keyCount"));
+        int keyStart = Integer.parseInt(keyMetadata.get(keyName + SEPARATOR + "keyStart"));
+        String keyPrefix = keyMetadata.get(keyName+ SEPARATOR + "keyPrefix");
+        int randomKeyId = (int) (Math.random() * keyCount);
+        int keyId = keyStart + randomKeyId;
         return keyMap.get(keyPrefix + keyId);
     }
 
-    private PrivateKey getPrivateKey(String path) throws Exception {
+    private PrivateKey loadPrivateKey(String path) throws Exception {
         FileInputStream in = new FileInputStream(path);
         byte[] keyBytes = new byte[in.available()];
         in.read(keyBytes);

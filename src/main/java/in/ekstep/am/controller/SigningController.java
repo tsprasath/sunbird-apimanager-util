@@ -55,7 +55,7 @@ public class SigningController {
                 .markSuccess();
 
         try {
-            KeyData keyData = keyManager.getRandomKey();
+            KeyData keyData = keyManager.getRandomKey("access");
             Map<String, String> headerOptions = createHeaderOptions(keyData.getKeyId());
             Payload[] data = request.getRequest().data();
             List<CompletableFuture<String>> futures = new ArrayList<>();

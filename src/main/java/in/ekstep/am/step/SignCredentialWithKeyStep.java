@@ -29,7 +29,7 @@ public class SignCredentialWithKeyStep implements Step {
   @Override
   public void execute() throws Exception {
      responseBuilder.setKey(key);
-     KeyData keyData = keyManager.getRandomKey();
+     KeyData keyData = keyManager.getRandomKey("device");
      responseBuilder.setToken(JWTUtil.createRS256Token(key, keyData.getPrivateKey(), createHeaderOptions(keyData.getKeyId())));
   }
 
