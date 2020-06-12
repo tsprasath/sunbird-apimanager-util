@@ -63,6 +63,7 @@ public class SigningController {
                 Payload item = data[i];
                 item.setIat(iat);
                 item.setExp(expiry);
+                log.info(item.toString() + " signed with " + keyData.getKeyId());
                 CompletableFuture<String> future = CompletableFuture.supplyAsync(() -> {
                     String token = JWTUtil.createRS256Token(headerOptions, item, keyData.getPrivateKey());
                     item.setToken(token);

@@ -13,29 +13,30 @@ import java.util.Map;
 
 public class SignCredentialWithKeyStep implements Step {
 
-  private final Logger log = LoggerFactory.getLogger(this.getClass());
-  private String userName;
-  private CredentialDetails responseBuilder;
-  private String key;
-  private KeyManager keyManager;
+    private final Logger log = LoggerFactory.getLogger(this.getClass());
+    private String userName;
+    private CredentialDetails responseBuilder;
+    private String key;
+    private KeyManager keyManager;
 
-  SignCredentialWithKeyStep(String userName, CredentialDetails responseBuilder, String key, KeyManager keyManager) {
-    this.userName = userName;
-    this.responseBuilder = responseBuilder;
-    this.key = key;
-    this.keyManager = keyManager;
-  }
+    SignCredentialWithKeyStep(String userName, CredentialDetails responseBuilder, String key, KeyManager keyManager) {
+        this.userName = userName;
+        this.responseBuilder = responseBuilder;
+        this.key = key;
+        this.keyManager = keyManager;
+    }
 
-  @Override
-  public void execute() throws Exception {
-     responseBuilder.setKey(key);
-     KeyData keyData = keyManager.getRandomKey("device");
-     responseBuilder.setToken(JWTUtil.createRS256Token(key, keyData.getPrivateKey(), createHeaderOptions(keyData.getKeyId())));
-  }
+    @Override
+    public void execute() throws Exception {
+        responseBuilder.setKey(key);
+        KeyData keyData = keyManager.getRandomKey("device");
+        log.info(key + " signed with " + keyData.getKeyId());
+        responseBuilder.setToken(JWTUtil.createRS256Token(key, keyData.getPrivateKey(), createHeaderOptions(keyData.getKeyId())));
+    }
 
-  private Map<String, String> createHeaderOptions(String keyId) {
-    Map<String, String> headers = new HashMap<>();
-    headers.put("kid", keyId);
-    return headers;
-  }
+    private Map<String, String> createHeaderOptions(String keyId) {
+        Map<String, String> headers = new HashMap<>();
+        headers.put("kid", keyId);
+        return headers;
+    }
 }
