@@ -13,7 +13,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.view.RedirectView;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import static java.text.MessageFormat.format;
@@ -60,11 +62,19 @@ public class ConsumerController {
   @Timed(name = "register-credential-apiv2")
   @RequestMapping(method = RequestMethod.POST, value = "/v2/consumer/mobile_device/credential/register",
           consumes = "application/json", produces = "application/json")
-  public ResponseEntity<RegisterCredentialResponse> registerCredential(@Valid @RequestBody RegisterCredentialRequest request, BindingResult bindingResult) {
+  public void registerCredential(@Valid @RequestBody RegisterCredentialRequest request, BindingResult bindingResult, HttpServletResponse response) throws Exception {
+    response.sendRedirect("/v3/consumer/mobile_device/credential/register");
+
+  }
+
+  @Timed(name = "register-credential-apiv3")
+  @RequestMapping(method = RequestMethod.POST, value = "/v3/consumer/mobile_device/credential/register",
+          consumes = "application/json", produces = "application/json")
+  public ResponseEntity<RegisterCredentialResponse> registerCredentialv3(@Valid @RequestBody RegisterCredentialRequest request, BindingResult bindingResult) {
     String userName = "mobile_device";
     RegisterCredentialResponseBuilder responseBuilder = new RegisterCredentialResponseBuilder();
     try {
-      log.debug(format("GOT REQUEST TO REGISTER CREDENTIAL v2. REQUEST: {0}, USERNAME:{1}", request, userName));
+      log.debug(format("GOT REQUEST TO REGISTER CREDENTIAL v3. REQUEST: {0}, USERNAME:{1}", request, userName));
 
       if (bindingResult.hasErrors()) {
         return responseBuilder.badRequest(bindingResult);
