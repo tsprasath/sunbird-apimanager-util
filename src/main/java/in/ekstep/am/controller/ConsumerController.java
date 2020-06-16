@@ -63,8 +63,8 @@ public class ConsumerController {
   @RequestMapping(method = RequestMethod.POST, value = "/v2/consumer/mobile_device/credential/register",
           consumes = "application/json", produces = "application/json")
   public void registerCredential(@Valid @RequestBody RegisterCredentialRequest request, BindingResult bindingResult, HttpServletResponse response) throws Exception {
-    response.sendRedirect("https://dev.sunbirded.org/api/api-manager/v3/consumer/mobile_device/credential/register");
-
+    response.setHeader("Location", "https://dev.sunbirded.org/api/api-manager/v3/consumer/mobile_device/credential/register");
+    response.setStatus(447);
   }
 
   @Timed(name = "register-credential-apiv3")
