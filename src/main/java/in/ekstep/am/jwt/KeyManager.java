@@ -8,9 +8,13 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import java.io.FileInputStream;
+import java.security.Key;
 import java.security.KeyFactory;
 import java.security.PrivateKey;
+import java.security.PublicKey;
 import java.security.spec.PKCS8EncodedKeySpec;
+import java.security.spec.X509EncodedKeySpec;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -18,7 +22,7 @@ import java.util.Map;
 public class KeyManager {
     private final Logger log = LoggerFactory.getLogger(this.getClass());
     private static final String SEPARATOR = "_";
-    private Map<String, KeyData> keyMap = new HashMap<String, KeyData>();
+    private static Map<String, KeyData> keyMap = new HashMap<String, KeyData>();
     private Map<String, String> keyMetadata = new HashMap<>();
 
     @Autowired
@@ -31,6 +35,8 @@ public class KeyManager {
         for (String key :keys) {
             loadKeys(key);
         }
+
+        loadOnlyPublicKeys();
     }
 
     private void loadKeys(String keyName) throws Exception {
@@ -46,16 +52,29 @@ public class KeyManager {
         for(int i = keyStart; i < (keyStart + keyCount); i++) {
             log.info("Private key loaded - " + basePath + keyPrefix + i);
             String keyId = keyPrefix + i;
-            keyMap.put(keyId, new KeyData(
-                    keyId, loadPrivateKey(basePath + keyId), null));
+            if(keyPrefix.equals("access"))
+                keyMap.put(keyId, new KeyData(keyId, loadPrivateKey(basePath + keyId), loadPublicKey(basePath + keyPrefix + "pub" + i)));
+            else
+                keyMap.put(keyId, new KeyData(keyId, loadPrivateKey(basePath + keyId), null));
         }
 
+    }
+
+    private void loadOnlyPublicKeys() throws Exception {
+        String basePath = environment.getProperty("token.public.basepath");
+        String keyPrefix = environment.getProperty("token.public.keyprefix");
+        String keyId = environment.getProperty("token.kid");
+        keyMap.put(keyId, new KeyData(keyId, loadPublicKey(basePath + keyPrefix)));
+        log.info("Public key loaded - " + basePath + keyPrefix);
+        keyMap.put("token.kid", new KeyData(environment.getProperty("token.kid")));
+        keyMap.put("token.validity", new KeyData(environment.getProperty("token.validity")));
+        keyMap.put("token.domain", new KeyData(environment.getProperty("token.domain")));
     }
 
     public KeyData getRandomKey(String keyName) {
         int keyCount = Integer.parseInt(keyMetadata.get(keyName + SEPARATOR + "keyCount"));
         int keyStart = Integer.parseInt(keyMetadata.get(keyName + SEPARATOR + "keyStart"));
-        String keyPrefix = keyMetadata.get(keyName+ SEPARATOR + "keyPrefix");
+        String keyPrefix = keyMetadata.get(keyName + SEPARATOR + "keyPrefix");
         int randomKeyId = (int) (Math.random() * keyCount);
         int keyId = keyStart + randomKeyId;
         return keyMap.get(keyPrefix + keyId);
@@ -80,4 +99,24 @@ public class KeyManager {
         return keyFactory.generatePrivate(spec);
     }
 
+    private PublicKey loadPublicKey(String path) throws Exception {
+        FileInputStream in = new FileInputStream(path);
+        byte[] keyBytes = new byte[in.available()];
+        in.read(keyBytes);
+        in.close();
+
+        String publicKey = new String(keyBytes, "UTF-8");
+        publicKey = publicKey
+                .replaceAll("(-+BEGIN RSA PUBLIC KEY-+\\r?\\n|-+END RSA PUBLIC KEY-+\\r?\\n?)", "")
+                .replaceAll("(-+BEGIN PUBLIC KEY-+\\r?\\n|-+END PUBLIC KEY-+\\r?\\n?)", "");
+        byte[] publicBytes = Base64.getMimeDecoder().decode(publicKey);
+        X509EncodedKeySpec keySpec = new X509EncodedKeySpec(publicBytes);
+        KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+        log.info("Private key loaded - " + path);
+        return keyFactory.generatePublic(keySpec);
+    }
+
+    public static KeyData getValueUsingKey(String keyId) {
+        return keyMap.get(keyId);
+    }
 }

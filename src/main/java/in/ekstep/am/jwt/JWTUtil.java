@@ -1,11 +1,19 @@
 package in.ekstep.am.jwt;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+
+import java.security.Key;
 import java.security.PrivateKey;
 import java.util.HashMap;
 import java.util.Map;
 
+import static java.text.MessageFormat.format;
+
 public class JWTUtil {
 
+    private final Logger log = LoggerFactory.getLogger(this.getClass());
     private static String SEPARATOR = ".";
 
     public static String createHS256Token(String key, String secretKey, Map<String, String> headerOptions) {
@@ -50,5 +58,33 @@ public class JWTUtil {
 
     private static String encodeToBase64Uri(byte[] data) {
         return Base64Util.encodeToString(data, 11);
+    }
+
+    public static boolean verifyRS256Token(String token) {
+        String[] tokenElements = token.split("\\.");
+        String header = tokenElements[0];
+        String body = tokenElements[1];
+        String signature = tokenElements[2];
+        String payLoad = header + SEPARATOR + body;
+        KeyData keyData;
+        boolean isValid = false;
+        Map<Object, Object> headerData = GsonUtil.fromJson(new String(decodeFromBase64(header)), Map.class);
+        String keyId = headerData.get("kid").toString();
+        keyData = KeyManager.getValueUsingKey(keyId);
+        if(keyData != null) {
+            isValid = CryptoUtil.verifyRSASign(payLoad, decodeFromBase64(signature), keyData.getPublicKey(), "SHA256withRSA");
+        }
+        return isValid;
+    }
+
+
+    public static Map decodeToken(String token){
+        Map<Object, Object> payloadData = GsonUtil.fromJson(new String(decodeFromBase64(token)), Map.class);
+        return decodeToken(token);
+    }
+
+
+    public static byte[] decodeFromBase64(String data) {
+        return Base64Util.decode(data, 11);
     }
 }
