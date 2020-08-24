@@ -21,7 +21,7 @@ import java.util.Map;
 public class KeyManager {
     private final Logger log = LoggerFactory.getLogger(this.getClass());
     private static final String SEPARATOR = "_";
-    private static Map<String, KeyData> keyMap = new HashMap<String, KeyData>();
+    private Map<String, KeyData> keyMap = new HashMap<String, KeyData>();
     private Map<String, String> keyMetadata = new HashMap<>();
 
     @Autowired
@@ -122,7 +122,7 @@ public class KeyManager {
         return keyFactory.generatePublic(keySpec);
     }
 
-    public static KeyData getValueUsingKey(String keyId) {
+    public KeyData getValueUsingKey(String keyId) {
         return keyMap.get(keyId);
     }
 }

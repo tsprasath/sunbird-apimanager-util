@@ -24,7 +24,7 @@ public class TokenSignStep implements TokenStep {
 
     @Override
     public void execute() throws Exception {
-        if (!JWTUtil.verifyRS256Token(token)) {
+        if (!JWTUtil.verifyRS256Token(token, keyManager)) {
             log.info("Error in refreshing token: Invalid Signature");
             tokenSignResponseBuilder.markFailure("Invalid Signature", "invalid_grant");
         } else {
@@ -68,12 +68,12 @@ public class TokenSignStep implements TokenStep {
         } else
             headers.put("kid", keyData.getKeyId());
 
-        if (!bodyData.get("iss").equals(KeyManager.getValueUsingKey("token.domain").getValue())) {
+        if (!bodyData.get("iss").equals(keyManager.getValueUsingKey("token.domain").getValue())) {
             log.info("Error in refreshing token. Invalid ISS: " + bodyData.get("iss"));
             tokenSignResponseBuilder.markFailure("Invalid ISS", "invalid_grant");
             return false;
         } else
-            body.put("iss", KeyManager.getValueUsingKey("token.domain").getValue());
+            body.put("iss", keyManager.getValueUsingKey("token.domain").getValue());
 
         long iat = System.currentTimeMillis() / 1000;
         long refreshIat = ((Double) bodyData.get("iat")).longValue();
