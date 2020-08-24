@@ -1,14 +1,12 @@
 package in.ekstep.am.keycloak.step;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import in.ekstep.am.jwt.*;
 import in.ekstep.am.keycloak.builder.KeycloakSignResponseBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 
+import java.text.DateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -39,13 +37,13 @@ public class KeycloakSignRefreshToken implements KeycloakStep {
             String body = tokenElements[1];
             Map headerData = GsonUtil.fromJson(new String(Base64Util.decode(header, 11)), Map.class);
             Map bodyData = GsonUtil.fromJson(new String(Base64Util.decode(body, 11)), Map.class);
-            boolean isValid = generateNewAccessToken(headerData, bodyData);
+            boolean isValid = generateNewToken(headerData, bodyData);
             if(isValid)
                 keycloakSignResponseBuilder.markSuccess();
         }
     }
 
-    private boolean generateNewAccessToken(Map headerData, Map bodyData) {
+    private boolean generateNewToken(Map headerData, Map bodyData) {
         Map<String, String> headers = new HashMap<>();
         Map<String, Object> body = new HashMap<>();
         KeyData keyData = keyManager.getRandomKey("access");
@@ -71,33 +69,47 @@ public class KeycloakSignRefreshToken implements KeycloakStep {
         } else
             headers.put("kid", keyData.getKeyId());
 
-        long iat = System.currentTimeMillis() / 1000;
-        long exp = iat + Long.parseLong(keyManager.getValueUsingKey("token.validity").getValue());
-        long currentExp = Double.valueOf((Double) bodyData.get("exp")).longValue();
-        if ( currentExp <  exp ) {
-            log.info("Error in refreshing token. Token expired: " + bodyData.get("exp"));
-            keycloakSignResponseBuilder.markFailure("Refresh token expired", "invalid_grant");
-            return false;
-        } else
-            body.put("exp", exp);
-
         if (!bodyData.get("iss").equals(KeyManager.getValueUsingKey("token.domain").getValue())) {
-            log.info("Error in refreshing token: Invalid ISS");
+            log.info("Error in refreshing token. Invalid ISS: " + bodyData.get("iss"));
             keycloakSignResponseBuilder.markFailure("Invalid ISS", "invalid_grant");
             return false;
         } else
             body.put("iss", KeyManager.getValueUsingKey("token.domain").getValue());
 
-        body.put("jti", UUID.randomUUID().toString());
-        body.put("nbf", 0);
+        long iat = System.currentTimeMillis() / 1000;
+        long refreshIat = ((Double) bodyData.get("iat")).longValue();
+        long validRefreshIat = refreshIat +  Long.parseLong(keyManager.getValueUsingKey("token.offline.vadity").getValue());
+        long exp = iat +  Long.parseLong(keyManager.getValueUsingKey("token.validity").getValue());
+
+        if (!bodyData.get("typ").equals("Offline")) {
+            log.info("Error in refreshing token. Not an offline token: " + bodyData.get("typ"));
+            keycloakSignResponseBuilder.markFailure("Not an offline token", "invalid_grant");
+            return false;
+        } else {
+            if(validRefreshIat < iat){
+                log.info("Error in refreshing token. Offline token expired at: " + new Date(validRefreshIat * 1000L));
+                return false;
+            }
+            else
+                body.put("exp", exp);
+        }
+
+        body.put("typ", "Bearer");
         body.put("iat", iat);
         body.put("aud", bodyData.get("aud"));
-        body.put("name", bodyData.get("name"));
-        body.put("preferred_username", bodyData.get("preferred_username"));
-        body.put("given_name", bodyData.get("given_name"));
-        body.put("email", bodyData.get("email"));
+        body.put("sub", bodyData.get("sub"));
+        body.put("session_state", bodyData.get("session_state"));
         String token = JWTUtil.createRS256Token(headers, body, keyData.getPrivateKey());
         keycloakSignResponseBuilder.setAccess_token(token);
+        keycloakSignResponseBuilder.setExpires_in(Long.parseLong(keyManager.getValueUsingKey("token.validity").getValue()));
+        keycloakSignResponseBuilder.setToken_type("Bearer");
+        keycloakSignResponseBuilder.setNot_before_policy(0);
+        keycloakSignResponseBuilder.setSession_state((String) bodyData.get("session_state"));
+        body.put("typ", "Offline");
+        body.put("exp", "0");
+        token = JWTUtil.createRS256Token(headers, body, keyData.getPrivateKey());
+        keycloakSignResponseBuilder.setRefresh_token(token);
+        keycloakSignResponseBuilder.setRefresh_expires_in(0);
         return true;
     }
 }

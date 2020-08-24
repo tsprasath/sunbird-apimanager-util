@@ -2,32 +2,26 @@ package in.ekstep.am.keycloak.builder;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import in.ekstep.am.builder.SignPayloadResponseBuilder;
+import in.ekstep.am.constraint.NoSpace;
 import in.ekstep.am.dto.ResponseParams;
 import in.ekstep.am.dto.signing.Payload;
 import in.ekstep.am.keycloak.dto.*;
 
+import javax.validation.constraints.NotNull;
+
 public class KeycloakSignResponseBuilder extends KeycloakResponseBuilder<KeycloakSignResponse> implements KeycloakToken {
 
     private String access_token;
-    private String expires_in;
-    private String refresh_expires_in;
+    private long expires_in;
+    private long refresh_expires_in;
     private String refresh_token;
     private String token_type;
-    private String not_before_policy;
+    private long not_before_policy;
     private String session_state;
 
     public static KeycloakSignResponseBuilder newInstance() {
         return new KeycloakSignResponseBuilder();
     }
-
-/*
-    public KeycloakSignResponse build() {
-        return new KeycloakSignResponse("api.refresh.token",
-                "1.0", System.currentTimeMillis(), success ? KeycloakResponseParams.successful() : KeycloakResponseParams.failed(err, errMsg),
-                success ? KeycloakResponseCode.OK : KeycloakResponseCode.invalid_grant,
-                new KeycloakSignResult(refresh_token));
-    }
-*/
 
     public KeycloakSignResponse build() {
         return new KeycloakSignResponse("api.refresh.token",
@@ -42,12 +36,12 @@ public class KeycloakSignResponseBuilder extends KeycloakResponseBuilder<Keycloa
     }
 
     @Override
-    public void setExpires_in(String expires_in) {
+    public void setExpires_in(long expires_in) {
         this.expires_in = expires_in;
     }
 
     @Override
-    public void setRefresh_expires_in(String refresh_expires_in) {
+    public void setRefresh_expires_in(long refresh_expires_in) {
         this.refresh_expires_in = refresh_expires_in;
     }
 
@@ -62,7 +56,7 @@ public class KeycloakSignResponseBuilder extends KeycloakResponseBuilder<Keycloa
     }
 
     @Override
-    public void setNot_before_policy(String not_before_policy) {
+    public void setNot_before_policy(long not_before_policy) {
         this.not_before_policy = not_before_policy;
     }
 

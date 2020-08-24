@@ -8,22 +8,22 @@ public class KeycloakSignResult {
     @JsonProperty
     private String access_token;
     @JsonProperty
-    private String expires_in;
+    private long expires_in;
     @JsonProperty
-    private String refresh_expires_in;
+    private long refresh_expires_in;
     @JsonProperty
     private String refresh_token;
     @JsonProperty
     private String token_type;
     @JsonProperty(value = "not-before-policy")
-    private String not_before_policy;
+    private long not_before_policy;
     @JsonProperty
     private String session_state;
 
     private KeycloakSignResult() {
     }
 
-    public KeycloakSignResult(String access_token, String expires_in, String refresh_expires_in, String refresh_token, String token_type, String not_before_policy, String session_state) {
+    public KeycloakSignResult(String access_token, long expires_in, long refresh_expires_in, String refresh_token, String token_type, long not_before_policy, String session_state) {
         this.access_token = access_token;
         this.expires_in = expires_in;
         this.refresh_expires_in = refresh_expires_in;

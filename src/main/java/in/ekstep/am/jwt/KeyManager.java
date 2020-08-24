@@ -69,6 +69,7 @@ public class KeyManager {
         keyMap.put("token.kid", new KeyData(environment.getProperty("token.kid")));
         keyMap.put("token.validity", new KeyData(environment.getProperty("token.validity")));
         keyMap.put("token.domain", new KeyData(environment.getProperty("token.domain")));
+        keyMap.put("token.offline.vadity", new KeyData(environment.getProperty("token.offline.vadity")));
     }
 
     public KeyData getRandomKey(String keyName) {
