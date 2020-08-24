@@ -40,6 +40,7 @@ public class KeycloakSignController {
             }
 
             keycloakSignResponseBuilder.markSuccess();
+            log.info("GOT REQUEST TO REFRESH TOKEN");
             keycloakSignStepChain.execute(keycloakSignRequest.getRefresh_token(), keycloakSignResponseBuilder);
             return keycloakSignResponseBuilder.response();
         }
