@@ -77,12 +77,10 @@ public class JWTUtil {
         return isValid;
     }
 
-
     public static Map decodeToken(String token){
         Map<Object, Object> payloadData = GsonUtil.fromJson(new String(decodeFromBase64(token)), Map.class);
         return decodeToken(token);
     }
-
 
     public static byte[] decodeFromBase64(String data) {
         return Base64Util.decode(data, 11);

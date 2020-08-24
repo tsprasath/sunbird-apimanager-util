@@ -1,4 +1,4 @@
-package in.ekstep.am.keycloak.dto;
+package in.ekstep.am.dto.token;
 
 import in.ekstep.am.constraint.NoSpace;
 import org.hibernate.validator.constraints.NotBlank;
@@ -7,17 +7,12 @@ import org.hibernate.validator.constraints.NotEmpty;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
-public class KeycloakSignRequest {
-    @Valid
-    @NotNull(message = "REFRESH TOKEN IS MANDATORY")
-    @NotEmpty(message = "REFRESH TOKEN IS MANDATORY")
-    @NotBlank(message = "REFRESH TOKEN IS MANDATORY")
-    @NoSpace(message = "REFRESH TOKEN IS MANDATORY")
+public class TokenSignRequest {
     private String refresh_token;
 
-    public KeycloakSignRequest(){}
+    public TokenSignRequest(){}
 
-    public KeycloakSignRequest(String refresh_token){
+    public TokenSignRequest(String refresh_token){
         this.refresh_token = refresh_token;
     }
 

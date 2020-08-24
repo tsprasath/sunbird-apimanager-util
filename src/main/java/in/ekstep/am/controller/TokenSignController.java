@@ -1,12 +1,9 @@
-package in.ekstep.am.keycloak.controller;
+package in.ekstep.am.controller;
 
 import com.codahale.metrics.annotation.Timed;
-import in.ekstep.am.keycloak.builder.KeycloakResponseBuilder;
-import in.ekstep.am.keycloak.builder.KeycloakSignResponseBuilder;
-import in.ekstep.am.keycloak.dto.KeycloakSignResponse;
-import in.ekstep.am.keycloak.step.KeycloakSignStepChain;
-import org.hibernate.validator.constraints.NotBlank;
-import org.hibernate.validator.constraints.NotEmpty;
+import in.ekstep.am.builder.TokenSignResponseBuilder;
+import in.ekstep.am.dto.token.TokenSignResponse;
+import in.ekstep.am.step.TokenSignStepChain;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,26 +11,23 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
-import in.ekstep.am.keycloak.dto.KeycloakSignRequest;
-
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
+import in.ekstep.am.dto.token.TokenSignRequest;
 
 import static java.text.MessageFormat.format;
 
 @RestController
-public class KeycloakSignController {
+public class TokenSignController {
 
     private final Logger log = LoggerFactory.getLogger(this.getClass());
 
     @Autowired
-    private KeycloakSignStepChain keycloakSignStepChain;
+    private TokenSignStepChain tokenSignStepChain;
 
     @Timed(name = "keycloak-refresh-sign-api")
     @PostMapping(path = "/v1/auth/refresh/token", consumes = "application/x-www-form-urlencoded", produces = "application/json")
     //public boolean verifyAndSignRefreshToken(@RequestParam("refresh_token") String refresh_token) throws Exception {
-    public ResponseEntity<KeycloakSignResponse> verifyAndSendRefreshToken(KeycloakSignRequest keycloakSignRequest , BindingResult bindingResult) throws Exception {
-        KeycloakSignResponseBuilder keycloakSignResponseBuilder = new KeycloakSignResponseBuilder();
+    public ResponseEntity<TokenSignResponse> verifyAndSendRefreshToken(TokenSignRequest tokenSignRequest, BindingResult bindingResult) throws Exception {
+        TokenSignResponseBuilder keycloakSignResponseBuilder = new TokenSignResponseBuilder();
         try {
             if (bindingResult.hasErrors()) {
                 return keycloakSignResponseBuilder.badRequest(bindingResult);
@@ -41,11 +35,11 @@ public class KeycloakSignController {
 
             keycloakSignResponseBuilder.markSuccess();
             log.info("GOT REQUEST TO REFRESH TOKEN");
-            keycloakSignStepChain.execute(keycloakSignRequest.getRefresh_token(), keycloakSignResponseBuilder);
+            tokenSignStepChain.execute(tokenSignRequest.getRefresh_token(), keycloakSignResponseBuilder);
             return keycloakSignResponseBuilder.response();
         }
         catch (Exception e) {
-            log.error(format("ERROR REFRESHING TOKEN: {0} ", e.getStackTrace()));
+            log.error(format("ERROR REFRESHING TOKEN: {0} ", (Object) e.getStackTrace()));
             return keycloakSignResponseBuilder.errorResponse("SOMETHING WENT WRONG", "INTERNAL_ERROR");
         }
     }

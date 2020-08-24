@@ -1,10 +1,10 @@
-package in.ekstep.am.keycloak.dto;
+package in.ekstep.am.dto.token;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class KeycloakSignResponse {
+public class TokenSignResponse {
     @JsonProperty
     private String id;
     @JsonProperty
@@ -12,15 +12,15 @@ public class KeycloakSignResponse {
     @JsonProperty
     private long ts;
     @JsonProperty
-    private KeycloakResponseParams params;
+    private TokenResponseParams params;
     @JsonProperty
-    private KeycloakResponseCode responseCode;
+    private TokenResponseCode responseCode;
     @JsonProperty
-    private KeycloakSignResult result;
+    private TokenSignResult result;
 
-    private KeycloakSignResponse(){}
+    private TokenSignResponse(){}
 
-    public KeycloakSignResponse(String id, String ver, long ts, KeycloakResponseParams params, KeycloakResponseCode responseCode, KeycloakSignResult result) {
+    public TokenSignResponse(String id, String ver, long ts, TokenResponseParams params, TokenResponseCode responseCode, TokenSignResult result) {
         this.id = id;
         this.ver = ver;
         this.ts = ts;
@@ -42,6 +42,6 @@ public class KeycloakSignResponse {
     }
 
     public boolean successful() {
-        return params.status() == KeycloakResponseStatus.successful;
+        return params.status() == TokenResponseStatus.successful;
     }
 }

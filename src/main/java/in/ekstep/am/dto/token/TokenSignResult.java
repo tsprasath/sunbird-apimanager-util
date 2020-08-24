@@ -1,10 +1,10 @@
-package in.ekstep.am.keycloak.dto;
+package in.ekstep.am.dto.token;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class KeycloakSignResult {
+public class TokenSignResult {
     @JsonProperty
     private String access_token;
     @JsonProperty
@@ -20,10 +20,10 @@ public class KeycloakSignResult {
     @JsonProperty
     private String session_state;
 
-    private KeycloakSignResult() {
+    private TokenSignResult() {
     }
 
-    public KeycloakSignResult(String access_token, long expires_in, long refresh_expires_in, String refresh_token, String token_type, long not_before_policy, String session_state) {
+    public TokenSignResult(String access_token, long expires_in, long refresh_expires_in, String refresh_token, String token_type, long not_before_policy, String session_state) {
         this.access_token = access_token;
         this.expires_in = expires_in;
         this.refresh_expires_in = refresh_expires_in;
@@ -33,7 +33,7 @@ public class KeycloakSignResult {
         this.session_state = session_state;
     }
 
-    public KeycloakSignResult(String refresh_token) {
+    public TokenSignResult(String refresh_token) {
         this.refresh_token = refresh_token;
     }
 

@@ -1,15 +1,11 @@
-package in.ekstep.am.keycloak.builder;
+package in.ekstep.am.builder;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import in.ekstep.am.builder.SignPayloadResponseBuilder;
-import in.ekstep.am.constraint.NoSpace;
-import in.ekstep.am.dto.ResponseParams;
-import in.ekstep.am.dto.signing.Payload;
-import in.ekstep.am.keycloak.dto.*;
+import in.ekstep.am.dto.token.TokenResponseCode;
+import in.ekstep.am.dto.token.TokenResponseParams;
+import in.ekstep.am.dto.token.TokenSignResponse;
+import in.ekstep.am.dto.token.TokenSignResult;
 
-import javax.validation.constraints.NotNull;
-
-public class KeycloakSignResponseBuilder extends KeycloakResponseBuilder<KeycloakSignResponse> implements KeycloakToken {
+public class TokenSignResponseBuilder extends ResponseBuilder<TokenSignResponse> implements TokenDetails {
 
     private String access_token;
     private long expires_in;
@@ -19,15 +15,15 @@ public class KeycloakSignResponseBuilder extends KeycloakResponseBuilder<Keycloa
     private long not_before_policy;
     private String session_state;
 
-    public static KeycloakSignResponseBuilder newInstance() {
-        return new KeycloakSignResponseBuilder();
+    public static TokenSignResponseBuilder newInstance() {
+        return new TokenSignResponseBuilder();
     }
 
-    public KeycloakSignResponse build() {
-        return new KeycloakSignResponse("api.refresh.token",
-                "1.0", System.currentTimeMillis(), success ? KeycloakResponseParams.successful() : KeycloakResponseParams.failed(err, errMsg),
-                success ? KeycloakResponseCode.OK : KeycloakResponseCode.invalid_grant,
-                new KeycloakSignResult(access_token, expires_in, refresh_expires_in, refresh_token, token_type, not_before_policy, session_state));
+    public TokenSignResponse build() {
+        return new TokenSignResponse("api.refresh.token",
+                "1.0", System.currentTimeMillis(), success ? TokenResponseParams.successful() : TokenResponseParams.failed(err, errMsg),
+                success ? TokenResponseCode.OK : TokenResponseCode.invalid_grant,
+                new TokenSignResult(access_token, expires_in, refresh_expires_in, refresh_token, token_type, not_before_policy, session_state));
     }
 
     @Override

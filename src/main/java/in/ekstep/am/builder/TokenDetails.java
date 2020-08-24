@@ -1,6 +1,6 @@
-package in.ekstep.am.keycloak.builder;
+package in.ekstep.am.builder;
 
-public interface KeycloakToken {
+public interface TokenDetails {
     void setAccess_token(String access_token);
     void setExpires_in(long expires_in);
     void setRefresh_expires_in(long refresh_expires_in);

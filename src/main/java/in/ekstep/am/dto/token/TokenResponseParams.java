@@ -1,4 +1,4 @@
-package in.ekstep.am.keycloak.dto;
+package in.ekstep.am.dto.token;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -6,35 +6,35 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.UUID;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class KeycloakResponseParams {
+public class TokenResponseParams {
     @JsonProperty
     private String resmsgid;
     @JsonProperty
-    private KeycloakResponseStatus status;
+    private TokenResponseStatus status;
     @JsonProperty
     private String err;
     @JsonProperty
     private String errmsg;
 
-    private KeycloakResponseParams() {
+    private TokenResponseParams() {
     }
 
-    public KeycloakResponseParams(KeycloakResponseStatus status, String err, String errmsg) {
+    public TokenResponseParams(TokenResponseStatus status, String err, String errmsg) {
         this.resmsgid = UUID.randomUUID().toString();
         this.status = status;
         this.err = err;
         this.errmsg = errmsg;
     }
 
-    public static KeycloakResponseParams successful() {
-        return new KeycloakResponseParams(KeycloakResponseStatus.successful, null, null);
+    public static TokenResponseParams successful() {
+        return new TokenResponseParams(TokenResponseStatus.successful, null, null);
     }
 
-    public static KeycloakResponseParams failed(String err, String errmsg) {
-        return new KeycloakResponseParams(KeycloakResponseStatus.failed, err, errmsg);
+    public static TokenResponseParams failed(String err, String errmsg) {
+        return new TokenResponseParams(TokenResponseStatus.failed, err, errmsg);
     }
 
-    public KeycloakResponseStatus status() {
+    public TokenResponseStatus status() {
         return status;
     }
 
