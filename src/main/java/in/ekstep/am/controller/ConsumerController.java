@@ -64,7 +64,7 @@ public class ConsumerController {
     String userName = "mobile_device";
     RegisterCredentialResponseBuilder responseBuilder = new RegisterCredentialResponseBuilder();
     try {
-      log.info(format("GOT REQUEST TO REGISTER CREDENTIAL v2. REQUEST: {0}, USERNAME:{1}", request, userName));
+      log.debug(format("GOT REQUEST TO REGISTER CREDENTIAL v2. REQUEST: {0}, USERNAME:{1}", request, userName));
 
       if (bindingResult.hasErrors()) {
         return responseBuilder.badRequest(bindingResult);

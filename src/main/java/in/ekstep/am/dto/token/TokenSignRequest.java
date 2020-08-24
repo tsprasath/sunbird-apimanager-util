@@ -1,12 +1,5 @@
 package in.ekstep.am.dto.token;
 
-import in.ekstep.am.constraint.NoSpace;
-import org.hibernate.validator.constraints.NotBlank;
-import org.hibernate.validator.constraints.NotEmpty;
-
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
-
 public class TokenSignRequest {
     private String refresh_token;
 

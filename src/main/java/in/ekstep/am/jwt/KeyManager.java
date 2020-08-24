@@ -8,7 +8,6 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import java.io.FileInputStream;
-import java.security.Key;
 import java.security.KeyFactory;
 import java.security.PrivateKey;
 import java.security.PublicKey;
@@ -52,12 +51,15 @@ public class KeyManager {
         for(int i = keyStart; i < (keyStart + keyCount); i++) {
             log.info("Private key loaded - " + basePath + keyPrefix + i);
             String keyId = keyPrefix + i;
+/*
+            // Code block for loading access public keys in case we want to verify tokens signed by us
             if(keyPrefix.equals("access")) {
                 keyMap.put(keyId, new KeyData(keyId, loadPrivateKey(basePath + keyId),
                         loadPublicKey(environment.getProperty("am.admin.api.accesspublic.basepath") +
                                 environment.getProperty("am.admin.api.accesspublic.keyprefix") + i)));
             }
             else
+*/
                 keyMap.put(keyId, new KeyData(keyId, loadPrivateKey(basePath + keyId), null));
         }
 
@@ -116,7 +118,7 @@ public class KeyManager {
         byte[] publicBytes = Base64.getMimeDecoder().decode(publicKey);
         X509EncodedKeySpec keySpec = new X509EncodedKeySpec(publicBytes);
         KeyFactory keyFactory = KeyFactory.getInstance("RSA");
-        log.info("Private key loaded - " + path);
+        log.info("Public key loaded - " + path);
         return keyFactory.generatePublic(keySpec);
     }
 

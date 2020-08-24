@@ -2,18 +2,12 @@ package in.ekstep.am.jwt;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
-
-import java.security.Key;
 import java.security.PrivateKey;
 import java.util.HashMap;
 import java.util.Map;
 
-import static java.text.MessageFormat.format;
-
 public class JWTUtil {
 
-    private final Logger log = LoggerFactory.getLogger(this.getClass());
     private static String SEPARATOR = ".";
 
     public static String createHS256Token(String key, String secretKey, Map<String, String> headerOptions) {

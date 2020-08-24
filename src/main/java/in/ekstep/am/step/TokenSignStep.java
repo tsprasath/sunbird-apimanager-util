@@ -4,14 +4,12 @@ import in.ekstep.am.jwt.*;
 import in.ekstep.am.builder.TokenSignResponseBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
 public class TokenSignStep implements TokenStep {
 
-    private static String SEPARATOR = ".";
     private final Logger log = LoggerFactory.getLogger(this.getClass());
     TokenSignResponseBuilder tokenSignResponseBuilder;
     private KeyManager keyManager;
@@ -59,8 +57,11 @@ public class TokenSignStep implements TokenStep {
             return false;
         } else
             headers.put("typ", (String) headerData.get("typ"));
-
+/*
+        // Code block to validate both kids - Keycloak and ours, in case we start to sign the refresh tokens
         if (!headerData.get("kid").equals( keyManager.getValueUsingKey("token.kid").getValue()) && !headerData.get("kid").equals(keyData.getKeyId())) {
+*/
+        if (!headerData.get("kid").equals( keyManager.getValueUsingKey("token.kid").getValue())) {
             log.info("Error in refreshing token. Invalid kid: " + keyManager.getValueUsingKey("token.kid").getValue());
             tokenSignResponseBuilder.markFailure("Invalid kid", "invalid_grant");
             return false;
