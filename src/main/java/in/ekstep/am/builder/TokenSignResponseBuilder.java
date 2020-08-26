@@ -1,6 +1,5 @@
 package in.ekstep.am.builder;
 
-import in.ekstep.am.dto.token.TokenResponseCode;
 import in.ekstep.am.dto.token.TokenResponseParams;
 import in.ekstep.am.dto.token.TokenSignResponse;
 import in.ekstep.am.dto.token.TokenSignResult;
@@ -22,7 +21,6 @@ public class TokenSignResponseBuilder extends ResponseBuilder<TokenSignResponse>
     public TokenSignResponse build() {
         return new TokenSignResponse("api.refresh.token",
                 "1.0", System.currentTimeMillis(), success ? TokenResponseParams.successful() : TokenResponseParams.failed(err, errMsg),
-                success ? TokenResponseCode.OK : TokenResponseCode.invalid_grant,
                 new TokenSignResult(accessToken, expiresIn, refreshExpiresIn, refreshToken, tokenType, notBeforePolicy, sessionState));
     }
 

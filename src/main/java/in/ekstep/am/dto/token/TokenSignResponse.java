@@ -14,18 +14,15 @@ public class TokenSignResponse {
     @JsonProperty
     private TokenResponseParams params;
     @JsonProperty
-    private TokenResponseCode responseCode;
-    @JsonProperty
     private TokenSignResult result;
 
     private TokenSignResponse(){}
 
-    public TokenSignResponse(String id, String ver, long ts, TokenResponseParams params, TokenResponseCode responseCode, TokenSignResult result) {
+    public TokenSignResponse(String id, String ver, long ts, TokenResponseParams params, TokenSignResult result) {
         this.id = id;
         this.ver = ver;
         this.ts = ts;
         this.params = params;
-        this.responseCode = responseCode;
         this.result = result;
     }
 
@@ -36,7 +33,6 @@ public class TokenSignResponse {
                 ", ver='" + ver + '\'' +
                 ", ts=" + ts +
                 ", params=" + params +
-                ", responseCode=" + responseCode +
                 ", result=" + result +
                 '}';
     }
