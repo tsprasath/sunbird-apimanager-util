@@ -7,7 +7,6 @@ public class KeyData {
     private String keyId;
     private PrivateKey privateKey;
     private PublicKey publicKey;
-    private String value;
 
     public KeyData(String keyId, PrivateKey privateKey, PublicKey publicKey) {
         this.keyId = keyId;
@@ -19,14 +18,6 @@ public class KeyData {
         this.keyId = keyId;
         this.publicKey = publicKey;
     }
-
-    public KeyData(String value){
-        this.value = value;
-    }
-
-    public String getValue() { return value; }
-
-    public void setValue(String value) { this.value = value;}
 
     public String getKeyId() {
         return keyId;

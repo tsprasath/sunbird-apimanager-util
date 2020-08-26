@@ -1,7 +1,6 @@
 package in.ekstep.am.jwt;
 
 import java.security.PrivateKey;
-import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -53,7 +52,7 @@ public class JWTUtil {
         return Base64Util.encodeToString(data, 11);
     }
 
-    public static boolean verifyRS256Token(String token, KeyManager keyManager) {
+    public static boolean verifyRS256Token(String token, KeyManager keyManager, String keyId) {
         String[] tokenElements = token.split("\\.");
         String header = tokenElements[0];
         String body = tokenElements[1];
@@ -61,9 +60,7 @@ public class JWTUtil {
         String payLoad = header + SEPARATOR + body;
         KeyData keyData;
         boolean isValid = false;
-        Map<Object, Object> headerData = GsonUtil.fromJson(new String(decodeFromBase64(header)), Map.class);
-        String keyId = headerData.get("kid").toString();
-        keyData = keyManager.getValueUsingKey(keyId);
+        keyData = keyManager.getValueFromKeyMap(keyId);
         if(keyData != null) {
             isValid = CryptoUtil.verifyRSASign(payLoad, decodeFromBase64(signature), keyData.getPublicKey(), "SHA256withRSA");
         }

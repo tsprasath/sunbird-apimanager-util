@@ -13,6 +13,8 @@ import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 import in.ekstep.am.dto.token.TokenSignRequest;
 
+import javax.validation.Valid;
+
 import static java.text.MessageFormat.format;
 
 @RestController
@@ -27,9 +29,9 @@ public class TokenSignController {
     @PostMapping(path = "/v1/auth/refresh/token", consumes = "application/x-www-form-urlencoded", produces = "application/json")
     public ResponseEntity<TokenSignResponse> verifyAndSendNewToken(TokenSignRequest tokenSignRequest, BindingResult bindingResult) throws Exception {
         TokenSignResponseBuilder tokenSignResponseBuilder = new TokenSignResponseBuilder();
-//        try {
-            log.info(tokenSignRequest.getRefresh_token());
-
+/*
+        try {
+*/
             if (bindingResult.hasErrors()) {
                 return tokenSignResponseBuilder.badRequest(bindingResult);
             }

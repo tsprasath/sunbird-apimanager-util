@@ -51,15 +51,6 @@ public class KeyManager {
         for(int i = keyStart; i < (keyStart + keyCount); i++) {
             log.info("Private key loaded - " + basePath + keyPrefix + i);
             String keyId = keyPrefix + i;
-/*
-            // Code block for loading access public keys in case we want to verify tokens signed by us
-            if(keyPrefix.equals("access")) {
-                keyMap.put(keyId, new KeyData(keyId, loadPrivateKey(basePath + keyId),
-                        loadPublicKey(environment.getProperty("am.admin.api.accesspublic.basepath") +
-                                environment.getProperty("am.admin.api.accesspublic.keyprefix") + i)));
-            }
-            else
-*/
                 keyMap.put(keyId, new KeyData(keyId, loadPrivateKey(basePath + keyId), null));
         }
 
@@ -69,12 +60,13 @@ public class KeyManager {
         String basePath = environment.getProperty("token.public.basepath");
         String keyPrefix = environment.getProperty("token.public.keyprefix");
         String keyId = environment.getProperty("token.kid");
-        keyMap.put("token.kid", new KeyData(environment.getProperty("token.kid")));
-        keyMap.put("token.validity", new KeyData(environment.getProperty("token.validity")));
-        keyMap.put("token.domain", new KeyData(environment.getProperty("token.domain")));
-        keyMap.put("token.offline.vadity", new KeyData(environment.getProperty("token.offline.vadity")));
+        keyMetadata.put("token.kid", keyId);
+        keyMetadata.put("token.validity", environment.getProperty("token.validity"));
+        keyMetadata.put("token.domain", environment.getProperty("token.domain"));
+        keyMetadata.put("token.offline.validity", environment.getProperty("token.offline.validity"));
+        keyMetadata.put("token.older.write.log", environment.getProperty("token.older.write.log"));
         keyMap.put(keyId, new KeyData(keyId, loadPublicKey(basePath + keyPrefix)));
-        log.info("Public key loaded - " + basePath + keyPrefix);
+        log.info("Token public key loaded - " + basePath + keyPrefix);
     }
 
     public KeyData getRandomKey(String keyName) {
@@ -122,7 +114,11 @@ public class KeyManager {
         return keyFactory.generatePublic(keySpec);
     }
 
-    public KeyData getValueUsingKey(String keyId) {
+    public String getValueFromKeyMetaData(String keyId) {
+        return keyMetadata.get(keyId);
+    }
+
+    public KeyData getValueFromKeyMap(String keyId) {
         return keyMap.get(keyId);
     }
 }
