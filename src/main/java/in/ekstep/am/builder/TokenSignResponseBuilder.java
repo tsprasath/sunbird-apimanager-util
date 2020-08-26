@@ -21,7 +21,6 @@ public class TokenSignResponseBuilder extends ResponseBuilder<TokenSignResponse>
                 new TokenSignResult(accessToken, expiresIn, refreshExpiresIn, refreshToken));
     }
 
-
     @Override
     public void setAccessToken(String accessToken) {
         this.accessToken = accessToken;

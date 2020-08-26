@@ -28,7 +28,6 @@ public class TokenSignResult {
         this.refreshToken = refreshToken;
     }
 
-
     @Override
     public String toString() {
         return "CreateKeycloakRefreshResult{" +

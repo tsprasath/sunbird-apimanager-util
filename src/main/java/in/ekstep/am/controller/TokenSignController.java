@@ -35,7 +35,7 @@ public class TokenSignController {
             return tokenSignResponseBuilder.response();
         }
         catch (Exception e) {
-            log.error("ERROR REFRESHING TOKEN: {0} " + e);
+            log.error("ERROR REFRESHING TOKEN" + e);
             return tokenSignResponseBuilder.errorResponse("Something went wrong", "INTERNAL_SERVER_ERROR");
         }
     }
