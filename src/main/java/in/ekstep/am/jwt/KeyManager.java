@@ -65,7 +65,7 @@ public class KeyManager {
         keyMetadata.put("token.domain", environment.getProperty("token.domain"));
         keyMetadata.put("token.offline.validity", environment.getProperty("token.offline.validity"));
         keyMetadata.put("token.older.write.log", environment.getProperty("token.older.write.log"));
-        keyMap.put(keyId, new KeyData(keyId, loadPublicKey(basePath + keyPrefix)));
+        keyMap.put(keyId, new KeyData(keyId, null, loadPublicKey(basePath + keyPrefix)));
         log.info("Token public key loaded - " + basePath + keyPrefix);
     }
 

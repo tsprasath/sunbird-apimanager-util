@@ -14,11 +14,6 @@ public class KeyData {
         this.publicKey = publicKey;
     }
 
-    public KeyData(String keyId, PublicKey publicKey) {
-        this.keyId = keyId;
-        this.publicKey = publicKey;
-    }
-
     public String getKeyId() {
         return keyId;
     }
