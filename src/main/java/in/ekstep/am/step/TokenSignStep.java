@@ -21,10 +21,12 @@ public class TokenSignStep implements TokenStep {
     private KeyManager keyManager;
     @Autowired
     TokenSignRequest token;
+    @Autowired
+    private KeyData keyData;
 
     private String currentToken, kid, iss;
     private Map headerData, bodyData;
-    private KeyData keyData;
+
     private long tokenValidity, offlineTokenValidity, iat, refreshIat;
 
     public TokenSignStep(TokenSignRequest token, TokenSignResponseBuilder tokenSignResponseBuilder, KeyManager keyManager) {
@@ -99,7 +101,7 @@ public class TokenSignStep implements TokenStep {
 
         header.put("alg", (String) headerData.get("alg"));
         header.put("typ", (String) headerData.get("typ"));
-        header.put("kid", kid);
+        header.put("kid", keyData.getKeyId());
         body.put("exp", exp);
         body.put("iat", iat);
         body.put("iss", iss);
@@ -107,8 +109,7 @@ public class TokenSignStep implements TokenStep {
         body.put("sub", bodyData.get("sub"));
         body.put("typ", "Bearer");
 
-        String token = JWTUtil.createRS256Token(header, body, keyData.getPrivateKey());
-        tokenSignResponseBuilder.setAccessToken(token);
+        tokenSignResponseBuilder.setAccessToken(JWTUtil.createRS256Token(header, body, keyData.getPrivateKey()));
         tokenSignResponseBuilder.setRefreshToken(currentToken);
         tokenSignResponseBuilder.setExpiresIn(tokenValidity);
         tokenSignResponseBuilder.setRefreshExpiresIn(0);
