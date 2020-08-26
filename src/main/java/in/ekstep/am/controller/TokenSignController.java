@@ -13,10 +13,6 @@ import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 import in.ekstep.am.dto.token.TokenSignRequest;
 
-import javax.validation.Valid;
-
-import static java.text.MessageFormat.format;
-
 @RestController
 public class TokenSignController {
 
@@ -27,11 +23,9 @@ public class TokenSignController {
 
     @Timed(name = "keycloak-refresh-sign-api")
     @PostMapping(path = "/v1/auth/refresh/token", consumes = "application/x-www-form-urlencoded", produces = "application/json")
-    public ResponseEntity<TokenSignResponse> verifyAndSendNewToken(TokenSignRequest tokenSignRequest, BindingResult bindingResult) throws Exception {
+    public ResponseEntity<TokenSignResponse> verifyAndSendNewToken(TokenSignRequest tokenSignRequest, BindingResult bindingResult) {
         TokenSignResponseBuilder tokenSignResponseBuilder = new TokenSignResponseBuilder();
-/*
         try {
-*/
             if (bindingResult.hasErrors()) {
                 return tokenSignResponseBuilder.badRequest(bindingResult);
             }
@@ -39,13 +33,11 @@ public class TokenSignController {
             tokenSignResponseBuilder.markSuccess();
             tokenSignStepChain.execute(tokenSignRequest, tokenSignResponseBuilder);
             return tokenSignResponseBuilder.response();
-//        }
-/*
+        }
         catch (Exception e) {
             log.error("ERROR REFRESHING TOKEN: {0} " + e);
-            return tokenSignResponseBuilder.errorResponse("Something went wrong", "INTERNAL_ERROR");
+            return tokenSignResponseBuilder.errorResponse("Something went wrong", "INTERNAL_SERVER_ERROR");
         }
-*/
     }
 
     @InitBinder
