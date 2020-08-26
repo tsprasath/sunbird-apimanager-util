@@ -104,9 +104,6 @@ public class TokenSignStep implements TokenStep {
         body.put("session_state", bodyData.get("session_state"));
         tokenSignResponseBuilder.setRefreshToken(token.getRefresh_token());
         tokenSignResponseBuilder.setExpiresIn(Long.parseLong(keyManager.getValueUsingKey("token.validity").getValue()));
-        tokenSignResponseBuilder.setTokenType("Bearer");
-        tokenSignResponseBuilder.setNotBeforePolicy(0);
-        tokenSignResponseBuilder.setSessionState((String) bodyData.get("session_state"));
         tokenSignResponseBuilder.setRefreshExpiresIn(0);
         String token = JWTUtil.createRS256Token(headers, body, keyData.getPrivateKey());
         tokenSignResponseBuilder.setAccessToken(token);
