@@ -35,8 +35,8 @@ public class TokenSignController {
             return tokenSignResponseBuilder.response();
         }
         catch (Exception e) {
-            log.error("ERROR REFRESHING TOKEN" + e);
-            return tokenSignResponseBuilder.errorResponse("Something went wrong", "INTERNAL_SERVER_ERROR");
+            log.error("ERROR REFRESHING TOKEN: " + tokenSignRequest.getRefresh_token() + "due to " + e);
+            return tokenSignResponseBuilder.errorResponse("INTERNAL_SERVER_ERROR", "Oops! Something went wrong!");
         }
     }
 
