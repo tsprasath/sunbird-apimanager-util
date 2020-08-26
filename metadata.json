@@ -1,1 +1,6 @@
-{"image_name" : "adminutil", "image_tag" : "0.0.1", "node_name" : "master"}
+{
+  "name": "adminutil",
+  "version": "1.5.0",
+  "org": "sunbird",
+  "hubuser": "purplesunbird"
+}
