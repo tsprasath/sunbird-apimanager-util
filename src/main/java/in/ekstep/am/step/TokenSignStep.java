@@ -122,11 +122,9 @@ public class TokenSignStep implements TokenStep {
 
     @Override
     public void execute() {
-        if(isJwtTokenValid()) {
+        if(isJwtTokenValid())
             generateNewJwtToken();
-        }
-        else {
+        else
             tokenSignResponseBuilder.markFailure("invalid_grant", "invalid_grant");
-        }
     }
 }
