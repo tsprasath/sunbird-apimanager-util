@@ -5,49 +5,49 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class TokenSignResult {
-    @JsonProperty
-    private String access_token;
-    @JsonProperty
-    private long expires_in;
-    @JsonProperty
-    private long refresh_expires_in;
-    @JsonProperty
-    private String refresh_token;
-    @JsonProperty
-    private String token_type;
+    @JsonProperty(value = "access_token")
+    private String accessToken;
+    @JsonProperty(value = "expires_in")
+    private long expiresIn;
+    @JsonProperty(value = "refresh_expires_in")
+    private long refreshExpiresIn;
+    @JsonProperty(value = "refresh_token")
+    private String refreshToken;
+    @JsonProperty(value = "token_type")
+    private String tokenType;
     @JsonProperty(value = "not-before-policy")
-    private long not_before_policy;
-    @JsonProperty
-    private String session_state;
+    private long notBeforePolicy;
+    @JsonProperty(value = "session_state")
+    private String sessionState;
 
     private TokenSignResult() {
     }
 
-    public TokenSignResult(String access_token, long expires_in, long refresh_expires_in, String refresh_token, String token_type, long not_before_policy, String session_state) {
-        this.access_token = access_token;
-        this.expires_in = expires_in;
-        this.refresh_expires_in = refresh_expires_in;
-        this.refresh_token = refresh_token;
-        this.token_type = token_type;
-        this.not_before_policy = not_before_policy;
-        this.session_state = session_state;
+    public TokenSignResult(String accessToken, long expiresIn, long refreshExpiresIn, String refreshToken, String tokenType, long notBeforePolicy, String sessionState) {
+        this.accessToken = accessToken;
+        this.expiresIn = expiresIn;
+        this.refreshExpiresIn = refreshExpiresIn;
+        this.refreshToken = refreshToken;
+        this.tokenType = tokenType;
+        this.notBeforePolicy = notBeforePolicy;
+        this.sessionState = sessionState;
     }
 
-    public TokenSignResult(String refresh_token) {
-        this.refresh_token = refresh_token;
+    public TokenSignResult(String refreshToken) {
+        this.refreshToken = refreshToken;
     }
 
 
     @Override
     public String toString() {
         return "CreateKeycloakRefreshResult{" +
-                "access_token='" + access_token + '\'' +
-                ", expires_in='" + expires_in + '\'' +
-                ", refresh_expires_in=" + refresh_expires_in +
-                ", refresh_token=" + refresh_token +
-                ", token_type=" + token_type +
-                ", not_before_policy=" + not_before_policy +
-                ", session_state=" + session_state +
+                "accessToken='" + accessToken + '\'' +
+                ", expiresIn='" + expiresIn + '\'' +
+                ", refresh_expiresIn=" + refreshExpiresIn +
+                ", refreshToken=" + refreshToken +
+                ", tokenType=" + tokenType +
+                ", notBeforePolicy=" + notBeforePolicy +
+                ", sessionState=" + sessionState +
                 '}';
     }
 }

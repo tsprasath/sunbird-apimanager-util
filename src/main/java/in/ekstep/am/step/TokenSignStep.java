@@ -1,9 +1,12 @@
 package in.ekstep.am.step;
 
+import in.ekstep.am.dto.token.TokenSignRequest;
 import in.ekstep.am.jwt.*;
 import in.ekstep.am.builder.TokenSignResponseBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -11,26 +14,30 @@ import java.util.Map;
 public class TokenSignStep implements TokenStep {
 
     private final Logger log = LoggerFactory.getLogger(this.getClass());
+    @Autowired
     TokenSignResponseBuilder tokenSignResponseBuilder;
+    @Autowired
     private KeyManager keyManager;
+    @Autowired
+    TokenSignRequest token;
 
-    String token;
-
-    public TokenSignStep(String token, TokenSignResponseBuilder keycloakSignResponseBuilder, KeyManager keyManager) {
+    public TokenSignStep(TokenSignRequest token, TokenSignResponseBuilder tokenSignResponseBuilder, KeyManager keyManager) {
         this.token = token;
-        this.tokenSignResponseBuilder = keycloakSignResponseBuilder;
+        this.tokenSignResponseBuilder = tokenSignResponseBuilder;
         this.keyManager = keyManager;
     }
 
     @Override
     public void execute() throws Exception {
-        if (!JWTUtil.verifyRS256Token(token, keyManager)) {
+        if (!JWTUtil.verifyRS256Token(token.getRefresh_token(), keyManager)) {
             log.info("Error in refreshing token: Invalid Signature");
             tokenSignResponseBuilder.markFailure("Invalid Signature", "invalid_grant");
         } else {
-            String[] tokenElements = token.split("\\.");
+
+            String[] tokenElements = token.getRefresh_token().split("\\.");
             String header = tokenElements[0];
             String body = tokenElements[1];
+
             Map headerData = GsonUtil.fromJson(new String(Base64Util.decode(header, 11)), Map.class);
             Map bodyData = GsonUtil.fromJson(new String(Base64Util.decode(body, 11)), Map.class);
             boolean isValid = generateNewToken(headerData, bodyData);
@@ -57,10 +64,7 @@ public class TokenSignStep implements TokenStep {
             return false;
         } else
             headers.put("typ", (String) headerData.get("typ"));
-/*
-        // Code block to validate both kids - Keycloak and ours, in case we start to sign the refresh tokens
-        if (!headerData.get("kid").equals( keyManager.getValueUsingKey("token.kid").getValue()) && !headerData.get("kid").equals(keyData.getKeyId())) {
-*/
+
         if (!headerData.get("kid").equals( keyManager.getValueUsingKey("token.kid").getValue())) {
             log.info("Error in refreshing token. Invalid kid: " + keyManager.getValueUsingKey("token.kid").getValue());
             tokenSignResponseBuilder.markFailure("Invalid kid", "invalid_grant");
@@ -98,20 +102,14 @@ public class TokenSignStep implements TokenStep {
         body.put("aud", bodyData.get("aud"));
         body.put("sub", bodyData.get("sub"));
         body.put("session_state", bodyData.get("session_state"));
-        tokenSignResponseBuilder.setRefresh_token(token);
-        tokenSignResponseBuilder.setExpires_in(Long.parseLong(keyManager.getValueUsingKey("token.validity").getValue()));
-        tokenSignResponseBuilder.setToken_type("Bearer");
-        tokenSignResponseBuilder.setNot_before_policy(0);
-        tokenSignResponseBuilder.setSession_state((String) bodyData.get("session_state"));
-        tokenSignResponseBuilder.setRefresh_expires_in(0);
+        tokenSignResponseBuilder.setRefreshToken(token.getRefresh_token());
+        tokenSignResponseBuilder.setExpiresIn(Long.parseLong(keyManager.getValueUsingKey("token.validity").getValue()));
+        tokenSignResponseBuilder.setTokenType("Bearer");
+        tokenSignResponseBuilder.setNotBeforePolicy(0);
+        tokenSignResponseBuilder.setSessionState((String) bodyData.get("session_state"));
+        tokenSignResponseBuilder.setRefreshExpiresIn(0);
         String token = JWTUtil.createRS256Token(headers, body, keyData.getPrivateKey());
-        tokenSignResponseBuilder.setAccess_token(token);
-/*
-        // Code to create refresh token and then set it using the setter method
-        body.put("typ", "Offline");
-        body.put("exp", "0");
-        token = JWTUtil.createRS256Token(headers, body, keyData.getPrivateKey());
-*/
+        tokenSignResponseBuilder.setAccessToken(token);
         return true;
     }
 }

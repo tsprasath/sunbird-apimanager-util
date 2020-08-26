@@ -25,23 +25,25 @@ public class TokenSignController {
 
     @Timed(name = "keycloak-refresh-sign-api")
     @PostMapping(path = "/v1/auth/refresh/token", consumes = "application/x-www-form-urlencoded", produces = "application/json")
-    //public boolean verifyAndSignRefreshToken(@RequestParam("refresh_token") String refresh_token) throws Exception {
-    public ResponseEntity<TokenSignResponse> verifyAndSendRefreshToken(TokenSignRequest tokenSignRequest, BindingResult bindingResult) throws Exception {
-        TokenSignResponseBuilder keycloakSignResponseBuilder = new TokenSignResponseBuilder();
-        try {
+    public ResponseEntity<TokenSignResponse> verifyAndSendNewToken(TokenSignRequest tokenSignRequest, BindingResult bindingResult) throws Exception {
+        TokenSignResponseBuilder tokenSignResponseBuilder = new TokenSignResponseBuilder();
+//        try {
+            log.info(tokenSignRequest.getRefresh_token());
+
             if (bindingResult.hasErrors()) {
-                return keycloakSignResponseBuilder.badRequest(bindingResult);
+                return tokenSignResponseBuilder.badRequest(bindingResult);
             }
 
-            keycloakSignResponseBuilder.markSuccess();
-            log.info("GOT REQUEST TO REFRESH TOKEN");
-            tokenSignStepChain.execute(tokenSignRequest.getRefresh_token(), keycloakSignResponseBuilder);
-            return keycloakSignResponseBuilder.response();
-        }
+            tokenSignResponseBuilder.markSuccess();
+            tokenSignStepChain.execute(tokenSignRequest, tokenSignResponseBuilder);
+            return tokenSignResponseBuilder.response();
+//        }
+/*
         catch (Exception e) {
-            log.error(format("ERROR REFRESHING TOKEN: {0} ", (Object) e.getStackTrace()));
-            return keycloakSignResponseBuilder.errorResponse("SOMETHING WENT WRONG", "INTERNAL_ERROR");
+            log.error("ERROR REFRESHING TOKEN: {0} " + e);
+            return tokenSignResponseBuilder.errorResponse("Something went wrong", "INTERNAL_ERROR");
         }
+*/
     }
 
     @InitBinder

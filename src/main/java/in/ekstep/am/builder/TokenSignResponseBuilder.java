@@ -7,13 +7,13 @@ import in.ekstep.am.dto.token.TokenSignResult;
 
 public class TokenSignResponseBuilder extends ResponseBuilder<TokenSignResponse> implements TokenDetails {
 
-    private String access_token;
-    private long expires_in;
-    private long refresh_expires_in;
-    private String refresh_token;
-    private String token_type;
-    private long not_before_policy;
-    private String session_state;
+    private String accessToken;
+    private long expiresIn;
+    private long refreshExpiresIn;
+    private String refreshToken;
+    private String tokenType;
+    private long notBeforePolicy;
+    private String sessionState;
 
     public static TokenSignResponseBuilder newInstance() {
         return new TokenSignResponseBuilder();
@@ -23,41 +23,42 @@ public class TokenSignResponseBuilder extends ResponseBuilder<TokenSignResponse>
         return new TokenSignResponse("api.refresh.token",
                 "1.0", System.currentTimeMillis(), success ? TokenResponseParams.successful() : TokenResponseParams.failed(err, errMsg),
                 success ? TokenResponseCode.OK : TokenResponseCode.invalid_grant,
-                new TokenSignResult(access_token, expires_in, refresh_expires_in, refresh_token, token_type, not_before_policy, session_state));
+                new TokenSignResult(accessToken, expiresIn, refreshExpiresIn, refreshToken, tokenType, notBeforePolicy, sessionState));
+    }
+
+
+    @Override
+    public void setAccessToken(String accessToken) {
+        this.accessToken = accessToken;
     }
 
     @Override
-    public void setAccess_token(String access_token) {
-        this.access_token = access_token;
+    public void setExpiresIn(long expiresIn) {
+        this.expiresIn = expiresIn;
     }
 
     @Override
-    public void setExpires_in(long expires_in) {
-        this.expires_in = expires_in;
+    public void setRefreshExpiresIn(long refreshExpiresIn) {
+        this.refreshExpiresIn = refreshExpiresIn;
     }
 
     @Override
-    public void setRefresh_expires_in(long refresh_expires_in) {
-        this.refresh_expires_in = refresh_expires_in;
+    public void setRefreshToken(String refreshToken) {
+        this.refreshToken = refreshToken;
     }
 
     @Override
-    public void setRefresh_token(String refresh_token) {
-        this.refresh_token = refresh_token;
+    public void setTokenType(String tokenType) {
+        this.tokenType = tokenType;
     }
 
     @Override
-    public void setToken_type(String token_type) {
-        this.token_type = token_type;
+    public void setNotBeforePolicy(long notBeforePolicy) {
+        this.notBeforePolicy = notBeforePolicy;
     }
 
     @Override
-    public void setNot_before_policy(long not_before_policy) {
-        this.not_before_policy = not_before_policy;
-    }
-
-    @Override
-    public void setSession_state(String session_state) {
-        this.session_state = session_state;
+    public void setSessionState(String sessionState) {
+        this.sessionState = sessionState;
     }
 }

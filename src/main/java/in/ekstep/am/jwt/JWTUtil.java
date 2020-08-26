@@ -1,6 +1,7 @@
 package in.ekstep.am.jwt;
 
 import java.security.PrivateKey;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 

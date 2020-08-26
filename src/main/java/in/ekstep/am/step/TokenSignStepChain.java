@@ -1,5 +1,6 @@
 package in.ekstep.am.step;
 
+import in.ekstep.am.dto.token.TokenSignRequest;
 import in.ekstep.am.jwt.KeyManager;
 import in.ekstep.am.builder.TokenSignResponseBuilder;
 import org.slf4j.Logger;
@@ -18,16 +19,16 @@ public class TokenSignStepChain {
     @Autowired
     private KeyManager keyManager;
 
-    public void execute(String token, TokenSignResponseBuilder keycloakSignResponseBuilder) throws Exception {
-        for (TokenStep step : stepChain(token, keycloakSignResponseBuilder)) {
-            if (keycloakSignResponseBuilder.successful()) {
+    public void execute(TokenSignRequest token, TokenSignResponseBuilder tokenSignResponseBuilder) throws Exception {
+        for (TokenStep step : stepChain(token, tokenSignResponseBuilder)) {
+            if (tokenSignResponseBuilder.successful()) {
                 step.execute();
             }
         }
     }
 
-    private List<TokenStep> stepChain(String token, TokenSignResponseBuilder keycloakSignResponseBuilder) {
-        TokenSignStep tokenSignStep = new TokenSignStep(token, keycloakSignResponseBuilder, keyManager);
+    private List<TokenStep> stepChain(TokenSignRequest token, TokenSignResponseBuilder tokenSignResponseBuilder) {
+        TokenSignStep tokenSignStep = new TokenSignStep(token, tokenSignResponseBuilder, keyManager);
         return asList(tokenSignStep);
     }
 }
