@@ -107,12 +107,11 @@ public class TokenSignStep implements TokenStep {
         body.put("sub", bodyData.get("sub"));
         body.put("typ", "Bearer");
 
+        String token = JWTUtil.createRS256Token(header, body, keyData.getPrivateKey());
+        tokenSignResponseBuilder.setAccessToken(token);
         tokenSignResponseBuilder.setRefreshToken(currentToken);
         tokenSignResponseBuilder.setExpiresIn(tokenValidity);
         tokenSignResponseBuilder.setRefreshExpiresIn(0);
-
-        String token = JWTUtil.createRS256Token(header, body, keyData.getPrivateKey());
-        tokenSignResponseBuilder.setAccessToken(token);
 
         long tokenOlderThanLog = Long.parseLong(keyManager.getValueFromKeyMetaData("token.older.write.log"));
         long tokenOlderThan =  ((new Date(iat * 1000).getTime() - new Date(refreshIat * 1000).getTime())  / (1000 * 60 * 60 * 24));
