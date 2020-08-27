@@ -111,10 +111,10 @@ public class TokenSignStep implements TokenStep {
         tokenSignResponseBuilder.setExpiresIn(tokenValidity);
         tokenSignResponseBuilder.setRefreshExpiresIn(0);
 
-        long tokenOlderThanLog = Long.parseLong(keyManager.getValueFromKeyMetaData("refresh.token.log.older.than"));
-        long tokenOlderThan = ((new Date(currentTime * 1000).getTime() - new Date(tokenWasIssuedAt * 1000).getTime())  / (1000 * 60 * 60 * 24));
-        if(tokenOlderThan >= tokenOlderThanLog)
-            log.info(format("Token issued before days: {0}", tokenOlderThan));
+        long refreshTokenLogOlderThan = Long.parseLong(keyManager.getValueFromKeyMetaData("refresh.token.log.older.than"));
+        long diffInDays = currentTime - tokenWasIssuedAt;
+        if(diffInDays >= refreshTokenLogOlderThan)
+            log.info(format("Token issued before days: {0}", new Date(diffInDays * 1000).getTime() / (1000 * 60 * 60 * 24)));
     }
 
     @Override
