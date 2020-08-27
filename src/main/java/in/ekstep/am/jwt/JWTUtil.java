@@ -51,4 +51,28 @@ public class JWTUtil {
     private static String encodeToBase64Uri(byte[] data) {
         return Base64Util.encodeToString(data, 11);
     }
+
+    public static boolean verifyRS256Token(String token, KeyManager keyManager, String keyId) {
+        String[] tokenElements = token.split("\\.");
+        String header = tokenElements[0];
+        String body = tokenElements[1];
+        String signature = tokenElements[2];
+        String payLoad = header + SEPARATOR + body;
+        KeyData keyData;
+        boolean isValid = false;
+        keyData = keyManager.getValueFromKeyMap(keyId);
+        if(keyData != null) {
+            isValid = CryptoUtil.verifyRSASign(payLoad, decodeFromBase64(signature), keyData.getPublicKey(), "SHA256withRSA");
+        }
+        return isValid;
+    }
+
+    public static Map decodeToken(String token){
+        Map<Object, Object> payloadData = GsonUtil.fromJson(new String(decodeFromBase64(token)), Map.class);
+        return decodeToken(token);
+    }
+
+    public static byte[] decodeFromBase64(String data) {
+        return Base64Util.decode(data, 11);
+    }
 }

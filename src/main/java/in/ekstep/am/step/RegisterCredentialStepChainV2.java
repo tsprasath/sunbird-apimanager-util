@@ -38,7 +38,6 @@ public class RegisterCredentialStepChainV2 {
   }
 
   private List<Step> stepChain(String userName, RegisterCredentialRequest request, RegisterCredentialResponseBuilder responseBuilder) {
-
     SignCredentialWithKeyStep createCredentialWithKeyStep = new SignCredentialWithKeyStep(
             userName, responseBuilder, request.key(), keyManager);
     return asList(createCredentialWithKeyStep);

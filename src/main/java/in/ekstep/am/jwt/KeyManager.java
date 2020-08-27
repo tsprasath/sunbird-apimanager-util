@@ -10,7 +10,10 @@ import javax.annotation.PostConstruct;
 import java.io.FileInputStream;
 import java.security.KeyFactory;
 import java.security.PrivateKey;
+import java.security.PublicKey;
 import java.security.spec.PKCS8EncodedKeySpec;
+import java.security.spec.X509EncodedKeySpec;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -31,6 +34,8 @@ public class KeyManager {
         for (String key :keys) {
             loadKeys(key);
         }
+
+        loadRefreshTokenParams();
     }
 
     private void loadKeys(String keyName) throws Exception {
@@ -46,16 +51,28 @@ public class KeyManager {
         for(int i = keyStart; i < (keyStart + keyCount); i++) {
             log.info("Private key loaded - " + basePath + keyPrefix + i);
             String keyId = keyPrefix + i;
-            keyMap.put(keyId, new KeyData(
-                    keyId, loadPrivateKey(basePath + keyId), null));
+                keyMap.put(keyId, new KeyData(keyId, loadPrivateKey(basePath + keyId), null));
         }
 
+    }
+
+    private void loadRefreshTokenParams() throws Exception {
+        String basePath = environment.getProperty("refresh.token.public.basepath");
+        String keyPrefix = environment.getProperty("refresh.token.public.keyprefix");
+        String keyId = environment.getProperty("refresh.token.kid");
+        keyMetadata.put("refresh.token.kid", keyId);
+        keyMetadata.put("refresh.token.domain", environment.getProperty("refresh.token.domain"));
+        keyMetadata.put("access.token.validity", environment.getProperty("access.token.validity"));
+        keyMetadata.put("refresh.token.offline.validity", environment.getProperty("refresh.token.offline.validity"));
+        keyMetadata.put("refresh.token.log.older.than", environment.getProperty("refresh.token.log.older.than"));
+        keyMap.put(keyId, new KeyData(keyId, null, loadPublicKey(basePath + keyPrefix)));
+        log.info("Token public key loaded - " + basePath + keyPrefix);
     }
 
     public KeyData getRandomKey(String keyName) {
         int keyCount = Integer.parseInt(keyMetadata.get(keyName + SEPARATOR + "keyCount"));
         int keyStart = Integer.parseInt(keyMetadata.get(keyName + SEPARATOR + "keyStart"));
-        String keyPrefix = keyMetadata.get(keyName+ SEPARATOR + "keyPrefix");
+        String keyPrefix = keyMetadata.get(keyName + SEPARATOR + "keyPrefix");
         int randomKeyId = (int) (Math.random() * keyCount);
         int keyId = keyStart + randomKeyId;
         return keyMap.get(keyPrefix + keyId);
@@ -80,4 +97,28 @@ public class KeyManager {
         return keyFactory.generatePrivate(spec);
     }
 
+    private PublicKey loadPublicKey(String path) throws Exception {
+        FileInputStream in = new FileInputStream(path);
+        byte[] keyBytes = new byte[in.available()];
+        in.read(keyBytes);
+        in.close();
+
+        String publicKey = new String(keyBytes, "UTF-8");
+        publicKey = publicKey
+                .replaceAll("(-+BEGIN RSA PUBLIC KEY-+\\r?\\n|-+END RSA PUBLIC KEY-+\\r?\\n?)", "")
+                .replaceAll("(-+BEGIN PUBLIC KEY-+\\r?\\n|-+END PUBLIC KEY-+\\r?\\n?)", "");
+        byte[] publicBytes = Base64.getMimeDecoder().decode(publicKey);
+        X509EncodedKeySpec keySpec = new X509EncodedKeySpec(publicBytes);
+        KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+        log.info("Public key loaded - " + path);
+        return keyFactory.generatePublic(keySpec);
+    }
+
+    public String getValueFromKeyMetaData(String keyId) {
+        return keyMetadata.get(keyId);
+    }
+
+    public KeyData getValueFromKeyMap(String keyId) {
+        return keyMap.get(keyId);
+    }
 }
