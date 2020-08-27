@@ -35,7 +35,7 @@ public class KeyManager {
             loadKeys(key);
         }
 
-        loadTokenEnvPublicKey();
+        loadRefreshTokenParams();
     }
 
     private void loadKeys(String keyName) throws Exception {
@@ -56,15 +56,15 @@ public class KeyManager {
 
     }
 
-    private void loadTokenEnvPublicKey() throws Exception {
-        String basePath = environment.getProperty("token.public.basepath");
-        String keyPrefix = environment.getProperty("token.public.keyprefix");
-        String keyId = environment.getProperty("token.kid");
-        keyMetadata.put("token.kid", keyId);
-        keyMetadata.put("token.validity", environment.getProperty("token.validity"));
-        keyMetadata.put("token.domain", environment.getProperty("token.domain"));
-        keyMetadata.put("token.offline.validity", environment.getProperty("token.offline.validity"));
-        keyMetadata.put("token.older.write.log", environment.getProperty("token.older.write.log"));
+    private void loadRefreshTokenParams() throws Exception {
+        String basePath = environment.getProperty("refresh.token.public.basepath");
+        String keyPrefix = environment.getProperty("refresh.token.public.keyprefix");
+        String keyId = environment.getProperty("refresh.token.kid");
+        keyMetadata.put("refresh.token.kid", keyId);
+        keyMetadata.put("refresh.token.domain", environment.getProperty("refresh.token.domain"));
+        keyMetadata.put("access.token.validity", environment.getProperty("access.token.validity"));
+        keyMetadata.put("refresh.token.offline.validity", environment.getProperty("refresh.token.offline.validity"));
+        keyMetadata.put("refresh.token.log.older.than", environment.getProperty("refresh.token.log.older.than"));
         keyMap.put(keyId, new KeyData(keyId, null, loadPublicKey(basePath + keyPrefix)));
         log.info("Token public key loaded - " + basePath + keyPrefix);
     }

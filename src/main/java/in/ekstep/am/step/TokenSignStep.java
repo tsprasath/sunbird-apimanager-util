@@ -26,7 +26,7 @@ public class TokenSignStep implements TokenStep {
 
     private String currentToken, kid, iss;
     private Map headerData, bodyData;
-    private long tokenValidity, offlineTokenValidity, iat, refreshIat;
+    private long tokenValidity, offlineTokenValidity, currentTime, tokenWasIssuedAt;
 
     public TokenSignStep(TokenSignRequest token, TokenSignResponseBuilder tokenSignResponseBuilder, KeyManager keyManager) {
         this.token = token;
@@ -36,23 +36,18 @@ public class TokenSignStep implements TokenStep {
 
     private boolean isJwtTokenValid() {
         currentToken = token.getRefresh_token();
-        headerData = GsonUtil.fromJson(new String(Base64Util.decode(currentToken.split("\\.")[0], 11)), Map.class);
-        bodyData = GsonUtil.fromJson(new String(Base64Util.decode(currentToken.split("\\.")[1], 11)), Map.class);
 
-
-        if(currentToken.split("\\.").length != 3){
+        if(currentToken.split("\\.").length != 3 || currentToken.equals(null)){
             log.error("Invalid JWT token: " + currentToken);
             return false;
         }
 
-        kid = keyManager.getValueFromKeyMetaData("token.kid");
+        headerData = GsonUtil.fromJson(new String(Base64Util.decode(currentToken.split("\\.")[0], 11)), Map.class);
+        bodyData = GsonUtil.fromJson(new String(Base64Util.decode(currentToken.split("\\.")[1], 11)), Map.class);
+
+        kid = keyManager.getValueFromKeyMetaData("refresh.token.kid");
         if (!headerData.get("kid").equals(kid)) {
             log.error("Invalid kid: " + headerData.get("kid"));
-            return false;
-        }
-
-        if (!JWTUtil.verifyRS256Token(currentToken, keyManager, kid)) {
-            log.error("Invalid Signature: " + currentToken);
             return false;
         }
 
@@ -66,7 +61,7 @@ public class TokenSignStep implements TokenStep {
             return false;
         }
 
-        iss = keyManager.getValueFromKeyMetaData("token.domain");
+        iss = keyManager.getValueFromKeyMetaData("refresh.token.domain");
         if (!bodyData.get("iss").equals(iss)) {
             log.error("Invalid ISS: " + bodyData.get("iss"));
             return false;
@@ -77,14 +72,19 @@ public class TokenSignStep implements TokenStep {
             return false;
         }
 
-        tokenValidity = Long.parseLong(keyManager.getValueFromKeyMetaData("token.validity"));
-        offlineTokenValidity =  Long.parseLong(keyManager.getValueFromKeyMetaData("token.offline.validity"));
-        iat = System.currentTimeMillis() / 1000;
-        refreshIat = ((Double) bodyData.get("iat")).longValue();
-        long validRefreshIat = refreshIat + offlineTokenValidity;
+        if (!JWTUtil.verifyRS256Token(currentToken, keyManager, kid)) {
+            log.error("Invalid Signature: " + currentToken);
+            return false;
+        }
 
-        if(validRefreshIat < iat){
-            log.error("Offline token expired on: " + new Date(validRefreshIat * 1000L));
+        tokenValidity = Long.parseLong(keyManager.getValueFromKeyMetaData("access.token.validity"));
+        offlineTokenValidity =  Long.parseLong(keyManager.getValueFromKeyMetaData("refresh.token.offline.validity"));
+        currentTime = System.currentTimeMillis() / 1000;
+        tokenWasIssuedAt = ((Double) bodyData.get("iat")).longValue();
+        long tokenValidTill = tokenWasIssuedAt + offlineTokenValidity;
+
+        if(tokenValidTill < currentTime){
+            log.error("Offline token expired on: " + new Date(tokenValidTill * 1000L));
             return false;
         }
         return true;
@@ -93,26 +93,26 @@ public class TokenSignStep implements TokenStep {
     private void generateNewJwtToken() {
         Map<String, String> header = new HashMap<>();
         Map<String, Object> body = new HashMap<>();
-        long exp = iat + tokenValidity;
+        long exp = currentTime + tokenValidity;
+        keyData = keyManager.getRandomKey("access");
 
         header.put("alg", (String) headerData.get("alg"));
         header.put("typ", (String) headerData.get("typ"));
         header.put("kid", keyData.getKeyId());
         body.put("exp", exp);
-        body.put("iat", iat);
+        body.put("iat", currentTime);
         body.put("iss", iss);
         body.put("aud", bodyData.get("aud"));
         body.put("sub", bodyData.get("sub"));
         body.put("typ", "Bearer");
 
-        keyData = keyManager.getRandomKey("access");
         tokenSignResponseBuilder.setAccessToken(JWTUtil.createRS256Token(header, body, keyData.getPrivateKey()));
         tokenSignResponseBuilder.setRefreshToken(currentToken);
         tokenSignResponseBuilder.setExpiresIn(tokenValidity);
         tokenSignResponseBuilder.setRefreshExpiresIn(0);
 
-        long tokenOlderThanLog = Long.parseLong(keyManager.getValueFromKeyMetaData("token.older.write.log"));
-        long tokenOlderThan = ((new Date(iat * 1000).getTime() - new Date(refreshIat * 1000).getTime())  / (1000 * 60 * 60 * 24));
+        long tokenOlderThanLog = Long.parseLong(keyManager.getValueFromKeyMetaData("refresh.token.log.older.than"));
+        long tokenOlderThan = ((new Date(currentTime * 1000).getTime() - new Date(tokenWasIssuedAt * 1000).getTime())  / (1000 * 60 * 60 * 24));
         if(tokenOlderThan >= tokenOlderThanLog)
             log.info(format("Token issued before days: {0}", tokenOlderThan));
     }
