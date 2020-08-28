@@ -34,8 +34,9 @@ public class KeyManager {
         for (String key :keys) {
             loadKeys(key);
         }
-
-        loadRefreshTokenParams();
+        if(environment.getProperty("refresh.token.preload").equals("true")) {
+            loadRefreshTokenParams();
+        }
     }
 
     private void loadKeys(String keyName) throws Exception {
