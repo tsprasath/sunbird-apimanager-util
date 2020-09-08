@@ -52,7 +52,7 @@ public class TokenSignStep implements TokenStep {
         }
 
         if (!headerData.get("alg").equals("RS256")) {
-            log.error(format("Invalid algorithm: {0}, invalidToken: {1}" , headerData.get("alg"), currentToken));
+            log.error(format("Invalid algorithm: {0}, invalidToken: {1}", headerData.get("alg"), currentToken));
             return false;
         }
 
@@ -63,12 +63,12 @@ public class TokenSignStep implements TokenStep {
 
         iss = keyManager.getValueFromKeyMetaData("refresh.token.domain");
         if (!bodyData.get("iss").equals(iss)) {
-            log.error(format("Invalid ISS: {0}, invalidToken: {1}" ,bodyData.get("iss"), currentToken));
+            log.error(format("Invalid ISS: {0}, invalidToken: {1}",bodyData.get("iss"), currentToken));
             return false;
         }
 
         if (!bodyData.get("typ").equals("Offline")) {
-            log.error(format("Not an offline token: {0}, invalidToken: {1}" , bodyData.get("typ"), currentToken));
+            log.error(format("Not an offline token: {0}, invalidToken: {1}", bodyData.get("typ"), currentToken));
             return false;
         }
 
@@ -82,6 +82,11 @@ public class TokenSignStep implements TokenStep {
         currentTime = System.currentTimeMillis() / 1000;
         tokenWasIssuedAt = ((Double) bodyData.get("iat")).longValue();
         long tokenValidTill = tokenWasIssuedAt + offlineTokenValidity;
+
+        if(tokenWasIssuedAt > currentTime) {
+            log.error("Offline token issued at a future date: " + tokenWasIssuedAt + ", invalidToken: " + currentToken);
+            return false;
+        }
 
         if(tokenValidTill < currentTime){
             log.error("Offline token expired on: " + tokenValidTill + ", invalidToken: " + currentToken);
