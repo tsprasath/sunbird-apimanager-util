@@ -38,7 +38,7 @@ public class TokenSignStep implements TokenStep {
         currentToken = token.getRefresh_token();
 
         if(currentToken.split("\\.").length != 3 || currentToken.equals(null)){
-            log.error("Invalid JWT token: " + currentToken);
+            log.error("Invalid length or null, invalidToken: " + currentToken);
             return false;
         }
 
@@ -47,33 +47,33 @@ public class TokenSignStep implements TokenStep {
 
         kid = keyManager.getValueFromKeyMetaData("refresh.token.kid");
         if (!headerData.get("kid").equals(kid)) {
-            log.error("Invalid kid: " + headerData.get("kid"));
+            log.error(format("Invalid kid: {0}, invalidToken: {1}", headerData.get("kid"), currentToken));
             return false;
         }
 
         if (!headerData.get("alg").equals("RS256")) {
-            log.error("Invalid algorithm:  " + headerData.get("alg"));
+            log.error(format("Invalid algorithm: {0}, invalidToken: {1}" , headerData.get("alg"), currentToken));
             return false;
         }
 
         if (!headerData.get("typ").equals("JWT")) {
-            log.error("Invalid typ: " + headerData.get("typ"));
+            log.error(format("Invalid typ: {0}, invalidToken: {1}", headerData.get("typ"), currentToken));
             return false;
         }
 
         iss = keyManager.getValueFromKeyMetaData("refresh.token.domain");
         if (!bodyData.get("iss").equals(iss)) {
-            log.error("Invalid ISS: " + bodyData.get("iss"));
+            log.error(format("Invalid ISS: {0}, invalidToken: {1}" ,bodyData.get("iss"), currentToken));
             return false;
         }
 
         if (!bodyData.get("typ").equals("Offline")) {
-            log.error("Not an offline token: " + bodyData.get("typ"));
+            log.error(format("Not an offline token: {0}, invalidToken: {1}" , bodyData.get("typ"), currentToken));
             return false;
         }
 
         if (!JWTUtil.verifyRS256Token(currentToken, keyManager, kid)) {
-            log.error("Invalid Signature: " + currentToken);
+            log.error(format("Invalid Signature, invalidToken: {1}", currentToken));
             return false;
         }
 
@@ -84,7 +84,7 @@ public class TokenSignStep implements TokenStep {
         long tokenValidTill = tokenWasIssuedAt + offlineTokenValidity;
 
         if(tokenValidTill < currentTime){
-            log.error("Offline token expired on: " + new Date(tokenValidTill * 1000L));
+            log.error("Offline token expired on: " + tokenValidTill + ", invalidToken: " + currentToken);
             return false;
         }
         return true;
@@ -114,7 +114,9 @@ public class TokenSignStep implements TokenStep {
         long refreshTokenLogOlderThan = Long.parseLong(keyManager.getValueFromKeyMetaData("refresh.token.log.older.than"));
         long diffInDays = (currentTime - tokenWasIssuedAt) / (60 * 60 * 24);
         if(diffInDays >= refreshTokenLogOlderThan)
-            log.info(format("Token issued before days: {0}", diffInDays));
+            log.info("Token issued before: " + diffInDays + ", UID: " + body.get("sub") + ", aud: " + body.get("aud") + ", exp: " + body.get("exp") + ", iat: " + body.get("iat"));
+        else
+            log.info("Token issued for UID: " + body.get("sub") + ", aud: " + body.get("aud") + ", exp: " + body.get("exp") + ", iat: " + body.get("iat"));
     }
 
     @Override

@@ -67,7 +67,6 @@ public class KeyManager {
         keyMetadata.put("refresh.token.offline.validity", environment.getProperty("refresh.token.offline.validity"));
         keyMetadata.put("refresh.token.log.older.than", environment.getProperty("refresh.token.log.older.than"));
         keyMap.put(keyId, new KeyData(keyId, null, loadPublicKey(basePath + keyPrefix)));
-        log.info("Token public key loaded - " + basePath + keyPrefix);
     }
 
     public KeyData getRandomKey(String keyName) {
