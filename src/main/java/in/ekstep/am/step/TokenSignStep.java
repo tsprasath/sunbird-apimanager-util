@@ -73,7 +73,7 @@ public class TokenSignStep implements TokenStep {
         }
 
         if (!JWTUtil.verifyRS256Token(currentToken, keyManager, kid)) {
-            log.error(format("Invalid Signature, invalidToken: {1}", currentToken));
+            log.error(format("Invalid Signature, invalidToken: {0}", currentToken));
             return false;
         }
 
@@ -83,15 +83,16 @@ public class TokenSignStep implements TokenStep {
         tokenWasIssuedAt = ((Double) bodyData.get("iat")).longValue();
         long tokenValidTill = tokenWasIssuedAt + offlineTokenValidity;
 
+        if(tokenValidTill < currentTime){
+            log.error("Offline token expired on: " + tokenValidTill + ", invalidToken: " + currentToken);
+            return false;
+        }
+
         if(tokenWasIssuedAt > currentTime) {
             log.error("Offline token issued at a future date: " + tokenWasIssuedAt + ", invalidToken: " + currentToken);
             return false;
         }
 
-        if(tokenValidTill < currentTime){
-            log.error("Offline token expired on: " + tokenValidTill + ", invalidToken: " + currentToken);
-            return false;
-        }
         return true;
     }
 
