@@ -54,35 +54,31 @@ public class ConsumerController {
       return responseBuilder
               .errorResponse("INTERNAL_ERROR", "UNABLE TO REGISTER CREDENTIAL DUE TO INTERNAL ERROR");
     }
-
   }
 
   @Timed(name = "register-credential-apiv2")
-  @RequestMapping(method = RequestMethod.POST, value = "/v2/consumer/mobile_device/credential/register",
+  @RequestMapping(method = RequestMethod.POST, value = "/v2/consumer/{consumer_name}/credential/register",
           consumes = "application/json", produces = "application/json")
-  public ResponseEntity<RegisterCredentialResponse> registerCredential(@Valid @RequestBody RegisterCredentialRequest request, BindingResult bindingResult) {
-    String userName = "mobile_device";
+  public ResponseEntity<RegisterCredentialResponse> registerCredentialv2(@Valid @PathVariable(value = "consumer_name") String consumer_name, @Valid @RequestBody RegisterCredentialRequest request, BindingResult bindingResult) {
+
     RegisterCredentialResponseBuilder responseBuilder = new RegisterCredentialResponseBuilder();
     try {
-      log.debug(format("GOT REQUEST TO REGISTER CREDENTIAL v2. REQUEST: {0}, USERNAME:{1}", request, userName));
-
       if (bindingResult.hasErrors()) {
         return responseBuilder.badRequest(bindingResult);
       }
 
       responseBuilder
               .withMsgid(request.msgid())
-              .withUsername(userName)
+              .withUsername(consumer_name)
               .markSuccess();
 
-      registerCredentialStepChainV2.execute(userName, request, responseBuilder);
+      registerCredentialStepChainV2.execute(consumer_name, request, responseBuilder);
       return responseBuilder.response();
     } catch (Exception e) {
-      log.error(format("ERROR WHEN REGISTERING CREDENTIAL. REQUEST: {0}, USERNAME:{1}", request, userName), e);
+      log.error(format("ERROR WHEN REGISTERING CREDENTIAL. REQUEST: {0}, USERNAME:{1}", request, consumer_name), e);
       return responseBuilder
               .errorResponse("INTERNAL_ERROR", "UNABLE TO REGISTER CREDENTIAL DUE TO INTERNAL ERROR");
     }
-
   }
 
   @InitBinder

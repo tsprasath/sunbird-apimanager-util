@@ -6,21 +6,19 @@ import in.ekstep.am.jwt.KeyData;
 import in.ekstep.am.jwt.KeyManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.security.PrivateKey;
 import java.util.HashMap;
 import java.util.Map;
 
 public class SignCredentialWithKeyStep implements Step {
 
     private final Logger log = LoggerFactory.getLogger(this.getClass());
-    private String userName;
+    private String consumer_name;
     private CredentialDetails responseBuilder;
     private String key;
     private KeyManager keyManager;
 
-    SignCredentialWithKeyStep(String userName, CredentialDetails responseBuilder, String key, KeyManager keyManager) {
-        this.userName = userName;
+    SignCredentialWithKeyStep(String consumer_name, CredentialDetails responseBuilder, String key, KeyManager keyManager) {
+        this.consumer_name = consumer_name;
         this.responseBuilder = responseBuilder;
         this.key = key;
         this.keyManager = keyManager;
@@ -29,7 +27,7 @@ public class SignCredentialWithKeyStep implements Step {
     @Override
     public void execute() throws Exception {
         responseBuilder.setKey(key);
-        KeyData keyData = keyManager.getRandomKey("device");
+        KeyData keyData = keyManager.getRandomKey(consumer_name);
         log.info(key + " signed with " + keyData.getKeyId());
         responseBuilder.setToken(JWTUtil.createRS256Token(key, keyData.getPrivateKey(), createHeaderOptions(keyData.getKeyId())));
     }

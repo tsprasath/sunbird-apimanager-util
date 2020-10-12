@@ -54,7 +54,6 @@ public class KeyManager {
             String keyId = keyPrefix + i;
                 keyMap.put(keyId, new KeyData(keyId, loadPrivateKey(basePath + keyId), null));
         }
-
     }
 
     private void loadRefreshTokenParams() throws Exception {
