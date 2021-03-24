@@ -15,6 +15,12 @@ public class JWTUtil {
         return payLoad + SEPARATOR + signature;
     }
 
+    public static String createHS256Token(String payLoad, byte[] secretKey) {
+        JWTokenType tokenType = JWTokenType.HS256;
+        String signature = encodeToBase64Uri(CryptoUtil.generateHMAC(payLoad, secretKey, tokenType.getAlgorithmName()));
+        return payLoad + SEPARATOR + signature;
+    }
+
     public static String createRS256Token(String key, PrivateKey privateKey, Map<String, String> headerOptions) {
         JWTokenType tokenType = JWTokenType.RS256;
         String payLoad = createHeader(tokenType, headerOptions) + SEPARATOR + createClaims(key);

@@ -60,7 +60,9 @@ public class KeyManager {
         String basePath = environment.getProperty("refresh.token.public.basepath");
         String keyPrefix = environment.getProperty("refresh.token.public.keyprefix");
         String keyId = environment.getProperty("refresh.token.kid");
+        String secretKey = environment.getProperty("refresh.token.secret.key");
         keyMetadata.put("refresh.token.kid", keyId);
+        keyMetadata.put("refresh.token.secret.key", secretKey);
         keyMetadata.put("refresh.token.domain", environment.getProperty("refresh.token.domain"));
         keyMetadata.put("access.token.validity", environment.getProperty("access.token.validity"));
         keyMetadata.put("refresh.token.offline.validity", environment.getProperty("refresh.token.offline.validity"));
