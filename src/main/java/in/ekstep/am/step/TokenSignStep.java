@@ -46,12 +46,12 @@ public class TokenSignStep implements TokenStep {
         bodyData = GsonUtil.fromJson(new String(Base64Util.decode(currentToken.split("\\.")[1], 11)), Map.class);
 
         kid = keyManager.getValueFromKeyMetaData("refresh.token.kid");
-        if (!headerData.get("kid").equals(kid)) {
+        if (!headerData.get("kid").equals(kid) && !headerData.get("alg").equals("HS256")) {
             log.error(format("Invalid kid: {0}, invalidToken: {1}", headerData.get("kid"), currentToken));
             return false;
         }
 
-        if (!headerData.get("alg").equals("RS256")) {
+        if (!headerData.get("alg").equals("RS256") && !headerData.get("alg").equals("HS256")) {
             log.error(format("Invalid algorithm: {0}, invalidToken: {1}", headerData.get("alg"), currentToken));
             return false;
         }
@@ -72,9 +72,23 @@ public class TokenSignStep implements TokenStep {
             return false;
         }
 
-        if (!JWTUtil.verifyRS256Token(currentToken, keyManager, kid)) {
-            log.error(format("Invalid Signature, invalidToken: {0}", currentToken));
-            return false;
+        if(headerData.get("alg").equals("RS256")) {
+            if (!JWTUtil.verifyRS256Token(currentToken, keyManager, kid)) {
+                log.error(format("Invalid RS256 Signature, invalidToken: {0}", currentToken));
+                return false;
+            }
+        }
+        else {
+            String secretKey, SEPARATOR = ".";
+            String[] tokenSplitData;
+            tokenSplitData = currentToken.split("\\.");
+            secretKey = keyManager.getValueFromKeyMetaData("refresh.token.secret.key");
+            String payload = tokenSplitData[0] + SEPARATOR + tokenSplitData[1];
+            String token = JWTUtil.createHS256Token(payload, Base64Util.decode(secretKey, 11));
+            if(!token.equals(currentToken)) {
+                log.error(format("Invalid HS256 Signature, invalidToken: {0}", currentToken));
+                return false;
+            }
         }
 
         tokenValidity = Long.parseLong(keyManager.getValueFromKeyMetaData("access.token.validity"));
