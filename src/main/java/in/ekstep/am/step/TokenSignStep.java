@@ -6,7 +6,8 @@ import in.ekstep.am.builder.TokenSignResponseBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import java.util.Date;
+
+import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -26,7 +27,7 @@ public class TokenSignStep implements TokenStep {
 
     private String currentToken, kid, iss;
     private Map headerData, bodyData;
-    private long tokenValidity, offlineTokenValidity, currentTime, tokenWasIssuedAt;
+    private long offlineTokenValidity, currentTime, tokenWasIssuedAt, tokenValidTill, tokenExpiry;
 
     public TokenSignStep(TokenSignRequest token, TokenSignResponseBuilder tokenSignResponseBuilder, KeyManager keyManager) {
         this.token = token;
@@ -67,8 +68,8 @@ public class TokenSignStep implements TokenStep {
             return false;
         }
 
-        if (!bodyData.get("typ").equals("Offline")) {
-            log.error(format("Not an offline token: {0}, invalidToken: {1}", bodyData.get("typ"), currentToken));
+        if (!bodyData.get("typ").equals("Offline") && !bodyData.get("typ").equals("Refresh")) {
+            log.error(format("Not an Offline or Refresh token: {0}, invalidToken: {1}", bodyData.get("typ"), currentToken));
             return false;
         }
 
@@ -91,20 +92,32 @@ public class TokenSignStep implements TokenStep {
             }
         }
 
-        tokenValidity = Long.parseLong(keyManager.getValueFromKeyMetaData("access.token.validity"));
-        offlineTokenValidity =  Long.parseLong(keyManager.getValueFromKeyMetaData("refresh.token.offline.validity"));
         currentTime = System.currentTimeMillis() / 1000;
-        tokenWasIssuedAt = ((Double) bodyData.get("iat")).longValue();
-        long tokenValidTill = tokenWasIssuedAt + offlineTokenValidity;
+        BigDecimal iat = new BigDecimal(bodyData.get("iat").toString());
+        BigDecimal exp = new BigDecimal(bodyData.get("exp").toString());
+        tokenWasIssuedAt = iat.longValueExact();
+        tokenExpiry = exp.longValueExact();
 
-        if(tokenValidTill < currentTime){
-            log.error("Offline token expired on: " + tokenValidTill + ", invalidToken: " + currentToken);
-            return false;
+
+        if(bodyData.get("typ").equals("Offline")) {
+            offlineTokenValidity = Long.parseLong(keyManager.getValueFromKeyMetaData("refresh.token.offline.validity"));
+            tokenValidTill = tokenWasIssuedAt + offlineTokenValidity;
+
+            if (tokenValidTill < currentTime) {
+                log.error("Offline token expired on: " + tokenValidTill + ", invalidToken: " + currentToken);
+                return false;
+            }
+
+            if (tokenWasIssuedAt > currentTime) {
+                log.error("Offline token issued at a future date: " + tokenWasIssuedAt + ", invalidToken: " + currentToken);
+                return false;
+            }
         }
-
-        if(tokenWasIssuedAt > currentTime) {
-            log.error("Offline token issued at a future date: " + tokenWasIssuedAt + ", invalidToken: " + currentToken);
-            return false;
+        else {
+            if(currentTime > tokenExpiry){
+                log.error("Refresh token expired on: " + tokenExpiry + ", invalidToken: " + currentToken);
+                return false;
+            }
         }
 
         return true;
@@ -113,8 +126,26 @@ public class TokenSignStep implements TokenStep {
     private void generateNewJwtToken() {
         Map<String, String> header = new HashMap<>();
         Map<String, Object> body = new HashMap<>();
-        long exp = currentTime + tokenValidity;
         keyData = keyManager.getRandomKey("access");
+        long tokenValidity = Long.parseLong(keyManager.getValueFromKeyMetaData("access.token.validity"));
+        long exp;
+
+        if(bodyData.get("typ").equals("Offline")) {
+            if(tokenValidTill < (tokenValidity + currentTime)) {
+                exp = tokenValidTill;
+            }
+            else {
+                exp = currentTime + tokenValidity;;
+            }
+        }
+        else {
+            if((currentTime + tokenValidity) < tokenExpiry) {
+                exp = currentTime + tokenValidity;
+            }
+            else {
+                exp = tokenExpiry;
+            }
+        }
 
         header.put("alg", (String) headerData.get("alg"));
         header.put("typ", (String) headerData.get("typ"));
@@ -128,15 +159,22 @@ public class TokenSignStep implements TokenStep {
 
         tokenSignResponseBuilder.setAccessToken(JWTUtil.createRS256Token(header, body, keyData.getPrivateKey()));
         tokenSignResponseBuilder.setRefreshToken(currentToken);
-        tokenSignResponseBuilder.setExpiresIn(tokenValidity);
-        tokenSignResponseBuilder.setRefreshExpiresIn(0);
+        tokenSignResponseBuilder.setExpiresIn(exp - currentTime);
+        if(bodyData.get("typ").equals("Offline")) {
+            tokenSignResponseBuilder.setRefreshExpiresIn(0);
+        }
+        else {
+            tokenSignResponseBuilder.setRefreshExpiresIn(tokenExpiry - currentTime);
+        }
 
-        long refreshTokenLogOlderThan = Long.parseLong(keyManager.getValueFromKeyMetaData("refresh.token.log.older.than"));
-        long diffInDays = (currentTime - tokenWasIssuedAt) / (60 * 60 * 24);
-        if(diffInDays >= refreshTokenLogOlderThan)
-            log.info("Token issued before: " + diffInDays + ", UID: " + body.get("sub") + ", aud: " + body.get("aud") + ", exp: " + body.get("exp") + ", iat: " + body.get("iat"));
-        else
-            log.info("Token issued for UID: " + body.get("sub") + ", aud: " + body.get("aud") + ", exp: " + body.get("exp") + ", iat: " + body.get("iat"));
+        if(bodyData.get("typ").equals("Offline")) {
+            long refreshTokenLogOlderThan = Long.parseLong(keyManager.getValueFromKeyMetaData("refresh.token.log.older.than"));
+            long diffInDays = (currentTime - tokenWasIssuedAt) / (60 * 60 * 24);
+            if (diffInDays >= refreshTokenLogOlderThan)
+                log.info("Token issued before: " + diffInDays + ", UID: " + body.get("sub") + ", aud: " + body.get("aud") + ", exp: " + body.get("exp") + ", iat: " + body.get("iat"));
+            else
+                log.info("Token issued for UID: " + body.get("sub") + ", aud: " + body.get("aud") + ", exp: " + body.get("exp") + ", iat: " + body.get("iat"));
+        }
     }
 
     @Override
