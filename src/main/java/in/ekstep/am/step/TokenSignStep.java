@@ -131,15 +131,15 @@ public class TokenSignStep implements TokenStep {
         long exp;
 
         if(bodyData.get("typ").equals("Offline")) {
-            if(tokenValidTill < (tokenValidity + currentTime)) {
-                exp = tokenValidTill;
+            if(tokenValidTill > (tokenValidity + currentTime)) {
+                exp = currentTime + tokenValidity;
             }
             else {
-                exp = currentTime + tokenValidity;;
+                exp = tokenValidTill;
             }
         }
         else {
-            if((currentTime + tokenValidity) < tokenExpiry) {
+            if(tokenExpiry > (currentTime + tokenValidity)) {
                 exp = currentTime + tokenValidity;
             }
             else {
