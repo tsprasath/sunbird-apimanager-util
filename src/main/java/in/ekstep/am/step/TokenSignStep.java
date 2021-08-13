@@ -6,7 +6,6 @@ import in.ekstep.am.builder.TokenSignResponseBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
@@ -98,7 +97,6 @@ public class TokenSignStep implements TokenStep {
         tokenWasIssuedAt = iat.longValueExact();
         tokenExpiry = exp.longValueExact();
 
-
         if(bodyData.get("typ").equals("Offline")) {
             offlineTokenValidity = Long.parseLong(keyManager.getValueFromKeyMetaData("refresh.token.offline.validity"));
             tokenValidTill = tokenWasIssuedAt + offlineTokenValidity;
@@ -119,7 +117,6 @@ public class TokenSignStep implements TokenStep {
                 return false;
             }
         }
-
         return true;
     }
 
@@ -131,7 +128,7 @@ public class TokenSignStep implements TokenStep {
         long exp;
 
         if(bodyData.get("typ").equals("Offline")) {
-            if(tokenValidTill > (tokenValidity + currentTime)) {
+            if(tokenValidTill > (currentTime + tokenValidity)) {
                 exp = currentTime + tokenValidity;
             }
             else {
@@ -160,6 +157,7 @@ public class TokenSignStep implements TokenStep {
         tokenSignResponseBuilder.setAccessToken(JWTUtil.createRS256Token(header, body, keyData.getPrivateKey()));
         tokenSignResponseBuilder.setRefreshToken(currentToken);
         tokenSignResponseBuilder.setExpiresIn(exp - currentTime);
+
         if(bodyData.get("typ").equals("Offline")) {
             tokenSignResponseBuilder.setRefreshExpiresIn(0);
         }
