@@ -168,10 +168,15 @@ public class TokenSignStep implements TokenStep {
         if(bodyData.get("typ").equals("Offline")) {
             long refreshTokenLogOlderThan = Long.parseLong(keyManager.getValueFromKeyMetaData("refresh.token.log.older.than"));
             long diffInDays = (currentTime - tokenWasIssuedAt) / (60 * 60 * 24);
-            if (diffInDays >= refreshTokenLogOlderThan)
+            if (diffInDays >= refreshTokenLogOlderThan) {
                 log.info("Token issued before: " + diffInDays + ", UID: " + body.get("sub") + ", aud: " + body.get("aud") + ", exp: " + body.get("exp") + ", iat: " + body.get("iat"));
-            else
+            }
+            else {
                 log.info("Token issued for UID: " + body.get("sub") + ", aud: " + body.get("aud") + ", exp: " + body.get("exp") + ", iat: " + body.get("iat"));
+            }
+        }
+        else {
+            log.info("Token issued for UID: " + body.get("sub") + ", aud: " + body.get("aud") + ", exp: " + body.get("exp") + ", iat: " + body.get("iat"));
         }
     }
 
