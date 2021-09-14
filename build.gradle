@@ -33,9 +33,14 @@ repositories {
   // mavenLocal()
 }
 
+configurations {
+  compile.exclude module: "spring-boot-starter-tomcat"
+}
+
 dependencies {
   compile('org.springframework.boot:spring-boot-starter')
   compile("org.springframework.boot:spring-boot-starter-web")
+  compile('org.apache.tomcat.embed:tomcat-embed-jasper:8.0.47')
   compile("com.google.code.gson:gson:2.8.6")
   compile("com.squareup.okhttp3:okhttp:3.6.0")
   compile("org.hibernate:hibernate-validator")
