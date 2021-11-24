@@ -51,6 +51,7 @@ dependencies {
   }
   compile("io.dropwizard.metrics:metrics-core")
   compile("io.dropwizard.metrics:metrics-annotation")
+  compile("org.apache.commons:commons-collections4:4.4")
 
   testCompile('io.rest-assured:rest-assured:3.0.2')
   testCompile('org.springframework.boot:spring-boot-starter-test')
