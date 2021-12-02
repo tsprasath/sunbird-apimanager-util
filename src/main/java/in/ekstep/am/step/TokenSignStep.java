@@ -20,8 +20,10 @@ import org.springframework.util.StringUtils;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static java.text.MessageFormat.format;
 
@@ -217,6 +219,7 @@ public class TokenSignStep implements TokenStep {
         if (MapUtils.isNotEmpty(result)) {
           List roles =  (List<Map<String,Object>>)result.get("roles");
           if (CollectionUtils.isNotEmpty(roles)) {
+            checkAndAppendPublicRole(roles);
             return roles;
           }
         }
@@ -225,6 +228,15 @@ public class TokenSignStep implements TokenStep {
       log.info("Got error response from learner api : "+response.body());
     }
     return appendDefaultRoles();
+  }
+
+  private void checkAndAppendPublicRole(List<Map<String,Object>> roles) {
+    // If user doesn't have PUBLIC role.
+    Set<String> roleList = new HashSet<>();
+    roles.stream().forEach(map -> roleList.add(((String)map.get("role")).toLowerCase()));
+    if (!roleList.contains("public")) {
+      roles.addAll(appendDefaultRoles());
+    }
   }
 
   private List<Map<String, Object>> appendDefaultRoles() {
