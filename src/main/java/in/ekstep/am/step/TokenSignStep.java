@@ -178,8 +178,17 @@ public class TokenSignStep implements TokenStep {
     if (Boolean.parseBoolean(environment.getProperty("embed.role"))) {
       try {
         AmResponse response = learnerApi.getUserRolesById(getLmsUserId((String) bodyData.get("sub")));
-        List<Map<String,Object>> roles = appendRoles(response);
-        body.put("roles", roles);
+        if (200 == response.code()) {
+          Map<String, Object> learnerResponse = GsonUtil.fromJson(response.body(), Map.class);
+          List<Map<String,Object>> roles = appendRoles(learnerResponse);
+          body.put("roles", roles);
+          if (roles.size() > 1) {
+            String name = getUserName(learnerResponse);
+            body.put("name", name);
+          }
+        } else {
+          log.info("Got error response from learner api : "+response.body());
+        }
       } catch (Exception ex) {
         log.error(format("Exception occurred while fetching user roles for id {0}", bodyData.get("sub")));
       }
@@ -211,21 +220,26 @@ public class TokenSignStep implements TokenStep {
     }
   }
 
-  private List<Map<String,Object>> appendRoles(AmResponse response) {
-    if (200 == response.code()) {
-      Map<String,Object> learnerResponse = GsonUtil.fromJson(response.body(),Map.class);
-      if (MapUtils.isNotEmpty(learnerResponse)) {
-        Map<String,Object> result = (Map<String, Object>) learnerResponse.get("result");
-        if (MapUtils.isNotEmpty(result)) {
-          List roles =  (List<Map<String,Object>>)result.get("roles");
-          if (CollectionUtils.isNotEmpty(roles)) {
-            checkAndAppendPublicRole(roles);
-            return roles;
-          }
+  private String getUserName(Map<String, Object> learnerResponse) {
+    if (MapUtils.isNotEmpty(learnerResponse)) {
+      Map<String,Object> result = (Map<String, Object>) learnerResponse.get("result");
+      if (MapUtils.isNotEmpty(result)) {
+        return (String)result.get("name");
+      }
+    }
+    return "";
+  }
+
+  private List<Map<String,Object>> appendRoles(Map<String, Object> learnerResponse) {
+    if (MapUtils.isNotEmpty(learnerResponse)) {
+      Map<String,Object> result = (Map<String, Object>) learnerResponse.get("result");
+      if (MapUtils.isNotEmpty(result)) {
+        List roles =  (List<Map<String,Object>>)result.get("roles");
+        if (CollectionUtils.isNotEmpty(roles)) {
+          checkAndAppendPublicRole(roles);
+          return roles;
         }
       }
-    } else {
-      log.info("Got error response from learner api : "+response.body());
     }
     return appendDefaultRoles();
   }
