@@ -1,0 +1,88 @@
+ACCESS_TOKEN_VALIDITY: 86400
+AM_ADMIN_API_ACCESS_BASEPATH: /keys/
+AM_ADMIN_API_ACCESS_KEYCOUNT: 0
+AM_ADMIN_API_ACCESS_KEYPREFIX: accessv1_key
+AM_ADMIN_API_ACCESS_KEYSTART: 0
+AM_ADMIN_API_DESKTOP_DEVICE_BASEPATH: /keys/
+AM_ADMIN_API_DESKTOP_DEVICE_KEYCOUNT: 0
+AM_ADMIN_API_DESKTOP_DEVICE_KEYPREFIX: desktop_devicev2_key
+AM_ADMIN_API_DESKTOP_DEVICE_KEYSTART: 0
+AM_ADMIN_API_ENDPOINT: http://kong.lern.svc.cluster.local:8001
+AM_ADMIN_API_KEYS: "mobile_device,desktop_device,portal_anonymous,portal_loggedin,access"
+AM_ADMIN_API_MOBILE_DEVICE_BASEPATH: /keys/
+AM_ADMIN_API_MOBILE_DEVICE_KEYCOUNT: 0
+AM_ADMIN_API_MOBILE_DEVICE_KEYPREFIX: mobile_devicev2_key
+AM_ADMIN_API_MOBILE_DEVICE_KEYSTART: 0
+AM_ADMIN_API_PORTAL_ANONYMOUS_BASEPATH: /keys/
+AM_ADMIN_API_PORTAL_ANONYMOUS_KEYCOUNT: 0
+AM_ADMIN_API_PORTAL_ANONYMOUS_KEYPREFIX: portal_anonymous_key
+AM_ADMIN_API_PORTAL_ANONYMOUS_KEYSTART: 0
+AM_ADMIN_API_PORTAL_LOGGEDIN_BASEPATH: /keys/
+AM_ADMIN_API_PORTAL_LOGGEDIN_KEYCOUNT: 0
+AM_ADMIN_API_PORTAL_LOGGEDIN_KEYPREFIX: portal_loggedin_key
+AM_ADMIN_API_PORTAL_LOGGEDIN_KEYSTART: 0
+DEFAULT_CONSUMER_GROUP: contentUser
+EMBED_ROLE: true
+ENDPOINTS_HEALTH_ID: apihealth
+ENDPOINTS_HEALTH_SENSITIVE: false
+ENDPOINTS_METRICS_ID: metrics
+ENDPOINTS_METRICS_SENSITIVE: false
+JAVA_OPTS: -Xms256m -Xmx256m
+#LEARNER_API_AUTH_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiI0S0RtWXh0Y3liNm1FQXk3MEZ5NDBWNzJTS0ZFa1J0dCJ9.XMT3cdkXIy1fBhaEGQJSL4Vn1ZcuAAhKKp41b82p_3U
+#LEARNER_BASE_API_URL: http://kong:8000
+REFRESH_TOKEN_DOMAIN: https://staging.sunbirded.org/auth/realms/sunbird 
+REFRESH_TOKEN_KID: GRxx8ur43pXH3_QMzBWerQPWrX02PJkK9Czl3hc60fA
+REFRESH_TOKEN_LOG_OLDER_THAN: 30
+REFRESH_TOKEN_OFFLINE_VALIDITY: 15552000
+REFRESH_TOKEN_PRELOAD: true
+REFRESH_TOKEN_PUBLIC_BASEPATH: /keys/
+REFRESH_TOKEN_PUBLIC_KEYPREFIX: refresh_token_public_key
+REFRESH_TOKEN_SECRET_KEY: E85S6OCwXrUIpAgVSEWxITX30gMGz4rciN1Pg7BSbyU
+SERVER_PORT: 4000
+SPRING_PROFILES_ACTIVE: production
+
+
+image:
+  registry: docker.io
+  repository: saiakhil46/adminutil
+  tag: release-5.1.0
+
+replicaCount: 1
+
+strategy:
+  maxSurge: 25%
+  maxUnavailable: 25%
+
+imagePullSecrets: ""
+
+javaOptions: -Xmx600m
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 100M
+  limits:
+    cpu: 1
+    memory: 1G
+
+port: 4000
+
+targetPort: 4000
+
+livenessProbe:
+  failureThreshold: 2
+  httpGet:
+      path: /health
+      port: 4000
+  initialDelaySeconds: 15
+  periodSeconds: 15
+  timeoutSeconds: 5
+
+readinessProbe:
+  failureThreshold: 2
+  httpGet:
+      path: /health
+      port: 4000
+  initialDelaySeconds: 15
+  periodSeconds: 15
+  timeoutSeconds: 5
