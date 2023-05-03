@@ -7,7 +7,7 @@ AM_ADMIN_API_DESKTOP_DEVICE_BASEPATH: /keys/
 AM_ADMIN_API_DESKTOP_DEVICE_KEYCOUNT: 0
 AM_ADMIN_API_DESKTOP_DEVICE_KEYPREFIX: desktop_devicev2_key
 AM_ADMIN_API_DESKTOP_DEVICE_KEYSTART: 0
-AM_ADMIN_API_ENDPOINT: http://kong.lern.svc.cluster.local:8001
+AM_ADMIN_API_ENDPOINT: http://kong.dev.svc.cluster.local:8001
 AM_ADMIN_API_KEYS: "mobile_device,desktop_device,portal_anonymous,portal_loggedin,access"
 AM_ADMIN_API_MOBILE_DEVICE_BASEPATH: /keys/
 AM_ADMIN_API_MOBILE_DEVICE_KEYCOUNT: 0
