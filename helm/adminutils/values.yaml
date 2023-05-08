@@ -28,20 +28,26 @@ ENDPOINTS_HEALTH_SENSITIVE: false
 ENDPOINTS_METRICS_ID: metrics
 ENDPOINTS_METRICS_SENSITIVE: false
 JAVA_OPTS: -Xms256m -Xmx256m
-#LEARNER_API_AUTH_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiI0S0RtWXh0Y3liNm1FQXk3MEZ5NDBWNzJTS0ZFa1J0dCJ9.XMT3cdkXIy1fBhaEGQJSL4Vn1ZcuAAhKKp41b82p_3U
-#LEARNER_BASE_API_URL: http://kong:8000
-REFRESH_TOKEN_DOMAIN: https://staging.sunbirded.org/auth/realms/sunbird 
-REFRESH_TOKEN_KID: GRxx8ur43pXH3_QMzBWerQPWrX02PJkK9Czl3hc60fA
+LEARNER_API_AUTH_KEY: 
+LEARNER_BASE_API_URL: http://kong:8000
+REFRESH_TOKEN_DOMAIN: https://easyinstallgsb.sunbirded.org/auth/realms/sunbird 
+REFRESH_TOKEN_KID: 
 REFRESH_TOKEN_LOG_OLDER_THAN: 30
 REFRESH_TOKEN_OFFLINE_VALIDITY: 15552000
 REFRESH_TOKEN_PRELOAD: true
 REFRESH_TOKEN_PUBLIC_BASEPATH: /keys/
 REFRESH_TOKEN_PUBLIC_KEYPREFIX: refresh_token_public_key
-REFRESH_TOKEN_SECRET_KEY: E85S6OCwXrUIpAgVSEWxITX30gMGz4rciN1Pg7BSbyU
+REFRESH_TOKEN_SECRET_KEY: 
 SERVER_PORT: 4000
 SPRING_PROFILES_ACTIVE: production
+accesstoken:
+  publickey:
+    basepath: /keys/
 
-
+external_configmaps:
+  access_public_keys:
+    name: user-access-keys-public
+        
 image:
   registry: docker.io
   repository: saiakhil46/adminutil
