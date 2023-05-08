@@ -45,8 +45,8 @@ accesstoken:
     basepath: /keys/
 
 external_configmaps:
-  access_public_keys:
-    name: user-access-keys-public
+  user_access_private_keys:
+    name: user-access-keys-private
         
 image:
   registry: docker.io

@@ -45,12 +45,12 @@ spec:
         {{- end }}
         volumeMounts:
         - mountPath: {{ .Values.accesstoken.publickey.basepath }}
-          name: {{ .Values.external_configmaps.access_public_keys.name }}                 
+          name: {{ .Values.external_configmaps.user_access_private_keys.name }}                 
       volumes:
-      - name: {{ .Values.external_configmaps.access_public_keys.name }}
+      - name: {{ .Values.external_configmaps.user_access_private_keys.name }}
         projected:
           sources:
             - secret:
-                name: {{ .Values.external_configmaps.access_public_keys.name }}
+                name: {{ .Values.external_configmaps.user_access_private_keys.name }}
             - secret:
                 name: refresh-token       
